@@ -14,6 +14,7 @@ Source code coming soon, for now please use the last released binary.
 - Adafruit DHT Sensor Library (https://github.com/adafruit/DHT-sensor-library v1.3.4)
 - OneWire (https://www.pjrc.com/teensy/td_libs_OneWire.html v2.3.4)
 - DallasTemperature (https://github.com/milesburton/Arduino-Temperature-Control-Library v3.8.0)
+- BME280 (https://github.com/finitespace/BME280 v2.3.0)
 
 Windows Users:
 Use https://github.com/nodemcu/nodemcu-flasher for flashing the firmware.
