@@ -21,3 +21,6 @@ Use https://github.com/nodemcu/nodemcu-flasher for flashing the firmware.
 
 Linux and Mac Users:
 Use https://github.com/espressif/esptool for flashing the firmware.
+
+Find more informations here:
+https://www.sensate.io
