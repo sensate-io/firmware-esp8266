@@ -16,14 +16,14 @@
 /**************************************************************************/
 
 #include "src/controller/Bridge.h"
-#include "src/output/display/DisplaySSD1306.h"
+#include "src/output/display/DisplayOLED128.h"
 #include "src/communication/WiFiManager.h"
 #include "src/controller/OTA.h"
 #include "src/communication/RestServer.h"
 
 Display* display = NULL;
 
-int currentVersion = 29; 
+int currentVersion = 30; 
 boolean printMemory = false;
 
 String board = "Generic";
@@ -101,7 +101,9 @@ void setup()
   if(displayType!=0)
   {
     boolean rotateDisplay = (displayRotation == 180);
-    display = new Display(rotateDisplay, "","",i2cSDAPort,i2cSCLPort);
+
+    display = new Display(rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
+
     if(!displayEnabled)
       display->clear(true);
   }

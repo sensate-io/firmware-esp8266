@@ -24,7 +24,7 @@
 
 #include "../controller/StateHelper.h"
 #include "../controller/UUID.h"
-#include "../output/display/DisplaySSD1306.h"
+#include "../output/display/DisplayOLED128.h"
 #include "../communication/WiFiManager.h"
 
 void startRestServer();

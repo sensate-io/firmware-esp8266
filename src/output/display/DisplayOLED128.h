@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     DisplaySSD1306.h
+    @file     DisplayOLED128.h
     @author   M. Fegerl (Sensate Digital Technologies GmbH)
     @license  GPL (see LICENSE file)
     The Sensate ESP8266 firmware is used to connect ESP8266 based hardware 
@@ -18,8 +18,8 @@
 #include "SSD1306Wire.h" 
 #include "SH1106Wire.h"
 
-#ifndef _DisplaySSD1306_h_
-#define _DisplaySSD1306_h_
+#ifndef _DisplayOLED128_h_
+#define _DisplayOLED128_h_
 
 #define Product_Logo_width 128
 #define Product_Logo_height 64
@@ -113,9 +113,10 @@ const uint8_t Product_Logo[] PROGMEM = {
 
 class Display {
   private:
-    SH1106Wire *display;
+    OLEDDisplay *display;
+    int type;
   public:
-    Display (bool, String, String, uint8_t, uint8_t);
+    Display (bool, int, String, uint8_t, uint8_t);
     void drawProductLogo();
     void clear(boolean update);
     void drawString(int16_t x, int16_t y, String text);
@@ -127,6 +128,7 @@ class Display {
     void drawValue(int position, String name, String shortName, float value, String unit);
     void drawValueClassic(int position, String name, String shortName, float value, String uit);
     void drawValueQuad(int position, String name, String shortName, float value, String unit);
+    int getType();
 };
 
 #endif

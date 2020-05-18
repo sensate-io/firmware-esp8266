@@ -33,7 +33,7 @@
 #include "../input/i2c/SensorBH1750.h"
 #include "../input/onewire/SensorDHT.h"
 #include "../input/onewire/SensorDallas.h"
-#include "../output/display/DisplaySSD1306.h"
+#include "../output/display/DisplayOLED128.h"
 
 bool registerBridge();
 void restoreBridgeConfig();

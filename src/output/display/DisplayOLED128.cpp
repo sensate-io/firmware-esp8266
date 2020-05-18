@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     DisplaySSD1306.cpp
+    @file     DisplayOLED128.cpp
     @author   M. Fegerl (Sensate Digital Technologies GmbH)
     @license  GPL (see LICENSE file)
     The Sensate ESP8266 firmware is used to connect ESP8266 based hardware 
@@ -15,7 +15,7 @@
 */
 /**************************************************************************/
 
-#include "DisplaySSD1306.h"
+#include "DisplayOLED128.h"
 
 extern bool isResetting;
 
@@ -27,7 +27,7 @@ int displayWidth;
 int displayRotation;
 bool firstSensorData;
 
-Display::Display(bool flip, String type, String address, uint8_t PortSDA, uint8_t PortSCL) {
+Display::Display(bool flip, int _type, String address, uint8_t PortSDA, uint8_t PortSCL) {
 
   if(!isResetting)
   {
@@ -40,8 +40,12 @@ Display::Display(bool flip, String type, String address, uint8_t PortSDA, uint8_
 
     firstSensorData=true;
 
-    display = new SH1106Wire(0x3c, PortSDA, PortSCL, g);
-    
+    type = _type;
+    if(_type==2)
+      display = new SSD1306Wire(0x3c, PortSDA, PortSCL, g);
+    else
+      display = new SH1106Wire(0x3c, PortSDA, PortSCL, g);
+
     display->init();
     if(flip)
       display->flipScreenVertically();
@@ -69,6 +73,11 @@ void Display::flip(int rotation) {
     display->flipScreenVertically();
   else
     display->resetOrientation();
+}
+
+int Display::getType()
+{
+  return type;
 }
 
 void Display::drawProductLogo() {
@@ -248,139 +257,3 @@ void Display::drawValueQuad(int position, String name, String shortName, float v
   }
 
 }
-
-//void drawLines() {
-//  for (int16_t i=0; i<display.getWidth(); i+=4) {
-//    display.drawLine(0, 0, i, display.getHeight()-1);
-//    display.display();
-//    delay(10);
-//  }
-//  for (int16_t i=0; i<display.getHeight(); i+=4) {
-//    display.drawLine(0, 0, display.getWidth()-1, i);
-//    display.display();
-//    delay(10);
-//  }
-//  delay(250);
-//
-//  display.clear();
-//  for (int16_t i=0; i<display.getWidth(); i+=4) {
-//    display.drawLine(0, display.getHeight()-1, i, 0);
-//    display.display();
-//    delay(10);
-//  }
-//  for (int16_t i=display.getHeight()-1; i>=0; i-=4) {
-//    display.drawLine(0, display.getHeight()-1, display.getWidth()-1, i);
-//    display.display();
-//    delay(10);
-//  }
-//  delay(250);
-//
-//  display.clear();
-//  for (int16_t i=display.getWidth()-1; i>=0; i-=4) {
-//    display.drawLine(display.getWidth()-1, display.getHeight()-1, i, 0);
-//    display.display();
-//    delay(10);
-//  }
-//  for (int16_t i=display.getHeight()-1; i>=0; i-=4) {
-//    display.drawLine(display.getWidth()-1, display.getHeight()-1, 0, i);
-//    display.display();
-//    delay(10);
-//  }
-//  delay(250);
-//  display.clear();
-//  for (int16_t i=0; i<display.getHeight(); i+=4) {
-//    display.drawLine(display.getWidth()-1, 0, 0, i);
-//    display.display();
-//    delay(10);
-//  }
-//  for (int16_t i=0; i<display.getWidth(); i+=4) {
-//    display.drawLine(display.getWidth()-1, 0, i, display.getHeight()-1);
-//    display.display();
-//    delay(10);
-//  }
-//  delay(250);
-//}
-//
-//// Adapted from Adafruit_SSD1306
-//void drawRect(void) {
-//  for (int16_t i=0; i<display.getHeight()/2; i+=2) {
-//    display.drawRect(i, i, display.getWidth()-2*i, display.getHeight()-2*i);
-//    display.display();
-//    delay(10);
-//  }
-//}
-//
-//// Adapted from Adafruit_SSD1306
-//void fillRect(void) {
-//  uint8_t color = 1;
-//  for (int16_t i=0; i<display.getHeight()/2; i+=3) {
-//    display.setColor((color % 2 == 0) ? BLACK : WHITE); // alternate colors
-//    display.fillRect(i, i, display.getWidth() - i*2, display.getHeight() - i*2);
-//    display.display();
-//    delay(10);
-//    color++;
-//  }
-//  // Reset back to WHITE
-//  display.setColor(WHITE);
-//}
-//
-//// Adapted from Adafruit_SSD1306
-//void drawCircle(void) {
-//  for (int16_t i=0; i<display.getHeight(); i+=2) {
-//    display.drawCircle(display.getWidth()/2, display.getHeight()/2, i);
-//    display.display();
-//    delay(10);
-//  }
-//  delay(1000);
-//  display.clear();
-//
-//  // This will draw the part of the circel in quadrant 1
-//  // Quadrants are numberd like this:
-//  //   0010 | 0001
-//  //  ------|-----
-//  //   0100 | 1000
-//  //
-//  display.drawCircleQuads(display.getWidth()/2, display.getHeight()/2, display.getHeight()/4, 0b00000001);
-//  display.display();
-//  delay(200);
-//  display.drawCircleQuads(display.getWidth()/2, display.getHeight()/2, display.getHeight()/4, 0b00000011);
-//  display.display();
-//  delay(200);
-//  display.drawCircleQuads(display.getWidth()/2, display.getHeight()/2, display.getHeight()/4, 0b00000111);
-//  display.display();
-//  delay(200);
-//  display.drawCircleQuads(display.getWidth()/2, display.getHeight()/2, display.getHeight()/4, 0b00001111);
-//  display.display();
-//}
-//
-//void printBuffer(void) {
-//  // Initialize the log buffer
-//  // allocate memory to store 8 lines of text and 30 chars per line.
-//  display.setLogBuffer(5, 30);
-//
-//  // Some test data
-//  const char* test[] = {
-//      "Hello",
-//      "World" ,
-//      "----",
-//      "Show off",
-//      "how",
-//      "the log buffer",
-//      "is",
-//      "working.",
-//      "Even",
-//      "scrolling is",
-//      "working"
-//  };
-//
-//  for (uint8_t i = 0; i < 11; i++) {
-//    display.clear();
-//    // Print to the screen
-//    display.println(test[i]);
-//    // Draw it to the internal screen buffer
-//    display.drawLogBuffer(0, 0);
-//    // Display it on the screen
-//    display.display();
-//    delay(500);
-//  }
-//}

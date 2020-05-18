@@ -16,7 +16,6 @@
 /**************************************************************************/
 
 #include "WiFiManager.h"
-#include "Hash.h"
 
 extern State state;
 extern Display* display;

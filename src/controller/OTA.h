@@ -16,6 +16,8 @@
 /**************************************************************************/
 
 #include <ESP8266httpUpdate.h>
+#include "StateHelper.h"
+#include "../output/display/DisplayOLED128.h"
 
 #ifndef _OTA_h_
 #define _OTA_h_

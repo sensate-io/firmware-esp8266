@@ -449,11 +449,11 @@ void configureBridge(JsonObject& bridgeConfig) {
     displayEnabled = false;
   }
 
-  if(displayType!=0 && (oldSCL != i2cSCLPort || oldSDA != i2cSDAPort || oldDisplayWidth != displayWidth || oldDisplayHeight != displayHeight))
+  if(displayType!=0 && (oldSCL != i2cSCLPort || oldSDA != i2cSDAPort || oldDisplayWidth != displayWidth || oldDisplayHeight != displayHeight) || (display!=NULL && display->getType()!=displayType))
   {
     Serial.println("CREATE TEMP DISPLAY for new I2C Bus!");
     boolean rotateDisplay = (displayRotation == 180);
-    display = new Display(rotateDisplay, "","",i2cSDAPort,i2cSCLPort);
+    display = new Display(rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
   }
   else
   {
@@ -465,7 +465,7 @@ void configureBridge(JsonObject& bridgeConfig) {
     {
       Serial.println("CREATE TEMP DISPLAY!");
       boolean rotateDisplay = (displayRotation == 180);
-      display = new Display(rotateDisplay, "","",i2cSDAPort,i2cSCLPort);
+      display = new Display(rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
     }
     else if(updateRotation && display!=NULL)
     {
@@ -980,7 +980,7 @@ boolean postSensorData(Data* data[], int dataCount)
         displayEnabled=true;
         boolean rotateDisplay = (displayRotation == 180);
         if(display==NULL)
-          display = new Display(rotateDisplay, "","",i2cSDAPort,i2cSCLPort);
+          display = new Display(rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
         storeDisplayAndPowerConfig(false);
       }
       else if(payload.equals("dd") && displayEnabled==true)

@@ -16,8 +16,6 @@
 /**************************************************************************/
 
 #include "OTA.h"
-#include "StateHelper.h"
-#include "../output/display/DisplaySSD1306.h"
 
 extern State state;
 extern Display* display;

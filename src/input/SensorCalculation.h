@@ -22,7 +22,7 @@
 #define __SensorCalculation_h_
 
 #include "../communication/Data.h"
-#include "../output/display/DisplaySSD1306.h"
+#include "../output/display/DisplayOLED128.h"
 
 class SensorCalculation {
   protected:
