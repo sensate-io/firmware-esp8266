@@ -568,6 +568,8 @@ void configureExpansionPort(int portNumber, JsonObject& portConfig) {
     calc = new SensorCalculationDirectOhm(portNumber);
   else if (portConfig["s"]["cf"] == "DIRECT_KOHM")
     calc = new SensorCalculationDirectKOhm(portNumber);  
+  else if (portConfig["s"]["cf"] == "DIRECT_PPM")
+    calc = new SensorCalculationDirectPPM(portNumber);  
   else if (portConfig["s"]["cf"] == "DIRECT_NONE")
     calc = new SensorCalculationDirectNone(portNumber);
   else if (portConfig["s"]["cf"] == "CALC_METER")
@@ -671,6 +673,8 @@ void configurePort(int portNumber, JsonObject& portConfig) {
     calc = new SensorCalculationDirectOhm(portNumber);
   else if (portConfig["s"]["cf"] == "DIRECT_KOHM")
     calc = new SensorCalculationDirectKOhm(portNumber);
+  else if (portConfig["s"]["cf"] == "DIRECT_PPM")
+    calc = new SensorCalculationDirectPPM(portNumber);
   else if (portConfig["s"]["cf"] == "DIRECT_NONE")
     calc = new SensorCalculationDirectNone(portNumber);
   else if (portConfig["s"]["cf"] == "CALC_METER")

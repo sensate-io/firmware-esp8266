@@ -90,6 +90,11 @@ SensorCalculationDirectKOhm::SensorCalculationDirectKOhm(int portNumber)
   _portNumber = portNumber;
 }
 
+SensorCalculationDirectPPM::SensorCalculationDirectPPM(int portNumber)
+{
+  _portNumber = portNumber;
+}
+
 SensorCalculationDirectNone::SensorCalculationDirectNone(int portNumber)
 {
   _portNumber = portNumber;
@@ -239,6 +244,15 @@ Data* SensorCalculationDirectKOhm::calculate(long id, String name, String shortN
   if(!postData)
     return NULL;
   return new Data (id, rawValue, "KOHM");
+}
+
+Data* SensorCalculationDirectPPM::calculate(long id, String name, String shortName, float rawValue, bool postData)
+{
+  if(display!=NULL && _portNumber>=0)
+    display->drawValue(_portNumber, name, shortName, rawValue, "ppm");
+  if(!postData)
+    return NULL;
+  return new Data (id, rawValue, "PPM");
 }
 
 Data* SensorCalculationDirectNone::calculate(long id, String name, String shortName, float rawValue, bool postData)

@@ -115,6 +115,12 @@ class SensorCalculationDirectKOhm : public SensorCalculation  {
     Data* calculate(long, String, String, float, bool);
 };
 
+class SensorCalculationDirectPPM : public SensorCalculation  {
+  public:
+    SensorCalculationDirectPPM(int);
+    Data* calculate(long, String, String, float, bool);
+};
+
 class SensorCalculationCalcAltitude : public SensorCalculation  {
   public:
     SensorCalculationCalcAltitude(int);

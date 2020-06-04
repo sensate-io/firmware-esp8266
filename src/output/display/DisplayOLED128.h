@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v30 - Added Support for SSD1306 Displays
     v29 - First Public Release
 */
 /**************************************************************************/
