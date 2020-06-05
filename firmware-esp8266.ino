@@ -11,6 +11,8 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v31 - Fixed an issue with DHT11 Sensors
+    v30 - Added support for SSD1306 I2C Displays
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -23,7 +25,7 @@
 
 Display* display = NULL;
 
-int currentVersion = 30; 
+int currentVersion = 31; 
 boolean printMemory = false;
 
 String board = "Generic";

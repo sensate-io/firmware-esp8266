@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v31 - Fixed an issue with DHT11 Sensors
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -73,7 +74,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT0)
     {
-      portFix(port);  
+      if(type!=DHT11)
+        portFix(port);  
       initDHT0=true;
       dht0 = new DHT_Unified(0, type);
       dht0->begin();
@@ -84,7 +86,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT1)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT1=true;
       dht1 = new DHT_Unified(1, type);
       dht1->begin();
@@ -95,7 +98,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT2)
     {
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT2=true;
       dht2 = new DHT_Unified(2, type);
       dht2->begin();
@@ -106,7 +110,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT3)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT3=true;
       dht3 = new DHT_Unified(3, type);
       dht3->begin();
@@ -120,7 +125,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT4)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT4=true;
       dht4 = new DHT_Unified(4, type);
       dht4->begin();
@@ -131,7 +137,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT5)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT5=true;
       dht5 = new DHT_Unified(5, type);
       dht5->begin();
@@ -145,7 +152,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT6)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT6=true;
       dht6 = new DHT_Unified(6, type);
       dht6->begin();
@@ -156,7 +164,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT7)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT7=true;
       dht7 = new DHT_Unified(7, type);
       dht7->begin();
@@ -167,7 +176,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT8)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT8=true;
       dht8 = new DHT_Unified(8, type);
       dht8->begin();
@@ -178,7 +188,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT9)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT9=true;
       dht9 = new DHT_Unified(9, type);
       dht9->begin();
@@ -192,7 +203,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT10)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT10=true;
       dht10 = new DHT_Unified(10, type);
       dht10->begin();
@@ -203,7 +215,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT11)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT11=true;
       dht11 = new DHT_Unified(11, type);
       dht11->begin();
@@ -214,7 +227,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT12)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT12=true;
       dht12 = new DHT_Unified(12, type);
       dht12->begin();
@@ -225,7 +239,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT13)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT13=true;
       dht13 = new DHT_Unified(13, type);
       dht13->begin();
@@ -236,7 +251,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT14)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT14=true;
       dht14 = new DHT_Unified(14, type);
       dht14->begin();
@@ -247,7 +263,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT15)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT15=true;
       dht15 = new DHT_Unified(15, type);
       dht15->begin();
@@ -258,7 +275,8 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
   {
     if(!initDHT16)
     {    
-      portFix(port);
+      if(type!=DHT11)
+        portFix(port);
       initDHT16=true;
       dht16 = new DHT_Unified(16, type);
       dht16->begin();
