@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -25,16 +26,16 @@
 
 class SensorBMx280 : public Sensor {
   private:
-    static BME280I2C* bme;
-    String _calcType;
+    static BME280I2C* bme76;
+    static BME280I2C* bme77;
+    BME280I2C* bme;
     float lastPostedValue = NAN;
   protected:
     Data* read(bool);
     void preCycle(int);
-    void postCycle(int);
     boolean smartSensorCheck(float, float, boolean);
   public:
-    SensorBMx280 (long, String, String, String, String, String, int, int, float, SensorCalculation*);
+    SensorBMx280 (long, String, String, String, String, int, int, float, SensorCalculation*);
 };
 
 #endif

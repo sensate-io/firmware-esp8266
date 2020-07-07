@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -42,6 +43,9 @@ extern String type;
 extern long powerOnDelay;
 extern String powerSavePort;
 extern boolean invPowerSavePort;
+
+extern boolean enableMQTT;
+extern MQTT* mqtt;
 
 uint8_t i2cSDAPort;
 uint8_t i2cSCLPort;
@@ -437,6 +441,8 @@ void configureBridge(JsonObject& bridgeConfig) {
 
     int newRotation = bridgeConfig["dr"];
 
+    enableMQTT = bridgeConfig["me"];
+
     if(displayRotation!=newRotation)
     {
         displayRotation = newRotation;
@@ -478,6 +484,8 @@ void configureBridge(JsonObject& bridgeConfig) {
       Wire.begin(i2cSDAPort, i2cSCLPort);
     }
   }
+
+  tryInitMQTT();
   
   storeDisplayAndPowerConfig(true);
 
@@ -536,6 +544,60 @@ void storeDisplayAndPowerConfig(boolean withPowerSettings) {
   EEPROM.end();
 
   yield();
+}
+
+void tryInitMQTT() {
+
+  if(!enableMQTT)
+    return;
+  
+  Serial.println("Trying to init MQTT client...");
+
+  EEPROM.begin(398);
+
+  int val314 = EEPROM.read(314);
+  int val315 = EEPROM.read(315);
+
+  if(val314 == 114 && val315 == 115)
+  {
+    char brokerUrl[36];
+    EEPROM.get(316, brokerUrl);
+    long brokerPort;
+    EEPROM.get(352, brokerPort);
+
+    int val356 = EEPROM.read(356);
+    int val357 = EEPROM.read(357);
+
+    if(val356 == 156 && val357 == 157)
+    {
+      Serial.println("Starting Authenticated MQTT Broker connection...");
+
+      char username[20];
+      EEPROM.get(358, username);
+      char password[20];
+      EEPROM.get(378, password);
+
+      mqtt = new MQTT(brokerUrl, brokerPort, String(username), String(password));
+    }
+    else
+    {
+      Serial.println(val356);
+      Serial.println(val357);
+      Serial.println("Starting Anonymous MQTT Broker connection...");
+      mqtt = new MQTT(brokerUrl, brokerPort);
+    }
+
+    mqtt->connect();
+  }
+  else
+  {
+    Serial.println("No MQTT Broker configured.");
+  }
+
+  EEPROM.end();
+
+  yield();
+
 }
 
 
@@ -605,36 +667,36 @@ void configureExpansionPort(int portNumber, JsonObject& portConfig) {
 
   if (portConfig["et"] == "ADS1015" || portConfig["et"] == "ADS1115")
   {
-    addSensor(new Ads1x15 (portConfig["id"], portConfig["sn"], portConfig["n"], portConfig["et"], portConfig["ec1"], portConfig["ch"], portConfig["c1"], portConfig["c2"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+    addSensor(new Ads1x15 (portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["et"], portConfig["ec1"], portConfig["ch"], portConfig["c1"], portConfig["c2"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
   }
   else if (portConfig["et"] == "DALLAS" || portConfig["et"] == "DS18B20")
   {
     uint8_t port = translateGPIOPort(portConfig["ec1"]);
-    addSensor(new SensorDallas(portConfig["id"], portConfig["sn"], portConfig["n"], port, portConfig["ch"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+    addSensor(new SensorDallas(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], port, portConfig["ch"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
   }
   else if (portConfig["et"] == "DHT11" || portConfig["et"] == "DHT21" || portConfig["et"] == "DHT22")
   {
     uint8_t port = translateGPIOPort(portConfig["ec1"]);
     if(port>=0)
     {
-      addSensor(new SensorDHT(portConfig["id"], portConfig["et"], portConfig["sn"], portConfig["n"], port, portConfig["s"]["cf"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+      addSensor(new SensorDHT(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["et"], port, refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
     }
   }
   else if (portConfig["et"] == "BME280" || portConfig["et"] == "BMP280")
   {    
-    addSensor(new SensorBMx280(portConfig["id"], portConfig["sn"], portConfig["n"], portConfig["ec1"], portConfig["ec2"], portConfig["s"]["cf"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+    addSensor(new SensorBMx280(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["ec1"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
   }
   else if (portConfig["et"] == "BME680")
   {    
-    addSensor(new SensorBME680(portConfig["id"], portConfig["sn"], portConfig["n"], portConfig["ec1"], portConfig["ec2"], portConfig["s"]["cf"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+    addSensor(new SensorBME680(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["ec1"], portConfig["ec2"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
   }
   else if (portConfig["et"] == "MAX44009")
   {    
-    addSensor(new SensorMax44009(portConfig["id"], portConfig["sn"], portConfig["n"], portConfig["ec1"], portConfig["ec2"], portConfig["s"]["cf"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+    addSensor(new SensorMax44009(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["ec1"], portConfig["ec2"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
   }
   else if (portConfig["et"] == "BH1750")
   {    
-    addSensor(new SensorBH1750(portConfig["id"], portConfig["sn"], portConfig["n"], portConfig["ec1"], portConfig["ec2"], portConfig["s"]["cf"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+    addSensor(new SensorBH1750(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["ec1"], portConfig["ec2"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
   }
   
 }
@@ -708,11 +770,11 @@ void configurePort(int portNumber, JsonObject& portConfig) {
   {
     if(portConfig["c1"]!=0 && portConfig["c2"]==0)
     {
-      addSensor(new SensorAnalogue (portConfig["id"], portConfig["sn"], portConfig["n"], portConfig["c1"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+      addSensor(new SensorAnalogue (portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["c1"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
     }
     else
     {
-      addSensor(new SensorAnalogue (portConfig["id"], portConfig["sn"], portConfig["n"], 0, refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+      addSensor(new SensorAnalogue (portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], 0, refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
     }
   }
 }
@@ -770,6 +832,10 @@ void loopSensor(int currentTimeMs) {
       submitSuccess = postSensorData(data, dataCount);
       abortDelay = submitSuccess;
       yield();
+      if(mqtt!=NULL)
+      {
+        mqtt->publishSensorData(data, dataCount);
+      }
     }
     else
     {

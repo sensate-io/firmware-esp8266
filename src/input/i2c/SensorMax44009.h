@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -26,13 +27,11 @@
 class SensorMax44009 : public Sensor {
   private:
     static MAX44009 *max44009;
-    String _calcType;
     boolean failedInit;
     float lastPostedValue = NAN;
   protected:
     Data* read(bool);
     void preCycle(int);
-    void postCycle(int);
     boolean smartSensorCheck(float, float, boolean);
   public:
     SensorMax44009 (long, String, String, String, String, String, int, int, float, SensorCalculation*);

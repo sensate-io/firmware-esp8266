@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v31 - Fixed an issue with DHT11 Sensors
     v29 - First Public Release
 */
@@ -57,7 +58,7 @@ DHT_Unified* SensorDHT::dht16 = NULL;
 extern boolean isResetting;
 extern int powerMode;
 
-SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, uint8_t port, String calcType, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorDHT::SensorDHT (long id, String category, String shortName, String name, String dhtType, uint8_t port, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
 
   uint8_t type;
 
@@ -283,8 +284,6 @@ SensorDHT::SensorDHT (long id, String dhtType, String shortName, String name, ui
     }
     dht = dht16;
   }
-
-   _calcType = calcType;
 }
 
 void SensorDHT::portFix(uint8_t port)
@@ -304,32 +303,30 @@ Data* SensorDHT::read(bool shouldPostData)
   if(!isResetting)
   {
     sensors_event_t event;
-    
-    if(_calcType=="DIRECT_PERCENT")
+
+    if(_calculation->getValueType()=="humidity")
     {
-       dht->humidity().getEvent(&event);
+      dht->humidity().getEvent(&event);
 
         if (isnan(event.relative_humidity)) {
           Serial.println("NAN Humidity!");
         }
         else {
           shouldPostData = smartSensorCheck(event.relative_humidity, _smartValueThreshold, shouldPostData);
-          return _calculation->calculate(_id, _name,  _shortName, event.relative_humidity, shouldPostData);
+          return _calculation->calculate(this, event.relative_humidity, shouldPostData);
         }
-      
     }
-    else if(_calcType=="DIRECT_CELSIUS")
-    {           
-       dht->temperature().getEvent(&event);
+    else if(_calculation->getValueType()=="temperature")
+    {
+      dht->temperature().getEvent(&event);
        
        if (isnan(event.temperature)) {
           Serial.println("NAN Temperature!");
         }
         else {
           shouldPostData = smartSensorCheck(event.temperature, _smartValueThreshold, shouldPostData);
-          return _calculation->calculate(_id, _name,  _shortName, event.temperature, shouldPostData);
+          return _calculation->calculate(this, event.temperature, shouldPostData);
         }
-       
     }
   }
  
@@ -358,10 +355,5 @@ boolean SensorDHT::smartSensorCheck(float currentRawValue, float threshhold, boo
   }
 
   return shouldPostData;
-  
-}
-
-void SensorDHT::postCycle(int cycleId)
-{
   
 }

@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -28,7 +29,7 @@ int SensorBME680::lastReadCycleId = 0;
 #define BME_MOSI 11
 #define BME_CS 10
 
-SensorBME680::SensorBME680 (long id, String shortName, String name, String PortSDA, String PortSCL, String calcType, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorBME680::SensorBME680 (long id, String category, String shortName, String name, String PortSDA, String PortSCL, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
   
   if(bme == NULL)
   {
@@ -65,9 +66,6 @@ SensorBME680::SensorBME680 (long id, String shortName, String name, String PortS
       bme->setGasHeater(320, 500); // 320*C for 500 ms
     }
   }
-  
-  _calcType = calcType;
-
 }
 
 void SensorBME680::preCycle(int cycleId)
@@ -102,37 +100,39 @@ Data* SensorBME680::read(bool shouldPostData)
 {  
   if(!isResetting && bme != NULL)
   {
-    if(_calcType=="DIRECT_PERCENT")
+    if(_calculation->getValueType()=="humidity")
     {
       float humidity = bme->humidity;
       shouldPostData = smartSensorCheck(humidity, _smartValueThreshold, shouldPostData);
-      return _calculation->calculate(_id, _name,  _shortName, humidity, shouldPostData);
+      return _calculation->calculate(this, humidity, shouldPostData);
     }
-    else if(_calcType=="DIRECT_CELSIUS")
+    else if(_calculation->getValueType()=="temperature")
     {           
        float tempC = bme->temperature;
        shouldPostData = smartSensorCheck(tempC, _smartValueThreshold, shouldPostData);
-       return _calculation->calculate(_id, _name,  _shortName, tempC, shouldPostData);       
+       return _calculation->calculate(this, tempC, shouldPostData);       
     }
-    else if(_calcType=="DIRECT_HEKTOPASCAL")
+    else if(_calculation->getValueType()=="pressure")
     {     
        float pressure = bme->pressure/100.0;
        shouldPostData = smartSensorCheck(pressure, _smartValueThreshold, shouldPostData);
-       return _calculation->calculate(_id, _name,  _shortName, pressure, shouldPostData);  
+       return _calculation->calculate(this, pressure, shouldPostData);  
     }
-    else if(_calcType=="DIRECT_OHM")
-    {      
-        float resistance = bme->gas_resistance;
-        shouldPostData = smartSensorCheck(resistance, _smartValueThreshold, shouldPostData);
-        return _calculation->calculate(_id, _name,  _shortName, resistance, shouldPostData);
+    else if(_calculation->getValueType()=="resistance")
+    {    
+        if(_calculation->getValueUnit()=="Ohm")
+        {
+          float resistance = bme->gas_resistance;
+          shouldPostData = smartSensorCheck(resistance, _smartValueThreshold, shouldPostData);
+          return _calculation->calculate(this, resistance, shouldPostData);
+        } 
+        else if(_calculation->getValueUnit()=="kOhm")
+        {
+          float resistance = bme->gas_resistance/1000.0;
+          shouldPostData = smartSensorCheck(resistance, _smartValueThreshold, shouldPostData);
+          return _calculation->calculate(this, resistance, shouldPostData);
+        }
     }
-    else if(_calcType=="DIRECT_KOHM")
-    {      
-        float resistance = bme->gas_resistance/1000.0;
-        shouldPostData = smartSensorCheck(resistance, _smartValueThreshold, shouldPostData);
-        return _calculation->calculate(_id, _name,  _shortName, resistance, shouldPostData);
-    }
-
   }
  
   return NULL;
@@ -159,13 +159,4 @@ boolean SensorBME680::smartSensorCheck(float currentRawValue, float threshhold, 
 
   return shouldPostData;
   
-}
-
-void SensorBME680::postCycle(int cycleId)
-{
-  for(int i = 0; i<10; i++)
-  {
-    yield();
-    delay(100);
-  }
 }

@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -28,7 +29,7 @@ Adafruit_ADS1015* Ads1x15::ads1x15_4B = NULL;
 
 extern int powerMode;
 
-Ads1x15::Ads1x15 (long id, String shortName, String name, String type, String addressString, int channel, int preResistor, int postResistor, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+Ads1x15::Ads1x15 (long id, String category, String shortName, String name, String type, String addressString, int channel, int preResistor, int postResistor, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
 
   _channel = channel;
   numberOfSamples = 10;
@@ -110,7 +111,7 @@ Data* Ads1x15::read(bool shouldPostData)
   {
     adc = adc/adcMax*1024;
     shouldPostData = smartSensorCheck(adc, _smartValueThreshold, shouldPostData);
-    return _calculation->calculate(_id, _name,  _shortName, adc, shouldPostData);
+    return _calculation->calculate(this, adc, shouldPostData);
   }
   else
   {
@@ -125,7 +126,7 @@ Data* Ads1x15::read(bool shouldPostData)
     {
       // Serial.printf("Corrected res: %f\n\r",res);
       shouldPostData = smartSensorCheck(res, _smartValueThreshold, shouldPostData);
-      return _calculation->calculate(_id, _name,  _shortName, res, shouldPostData);
+      return _calculation->calculate(this, res, shouldPostData);
     }
   }
 
@@ -153,10 +154,5 @@ boolean Ads1x15::smartSensorCheck(float currentRawValue, float threshhold, boole
   }
 
   return shouldPostData;
-  
-}
-
-void Ads1x15::postCycle(int cycleId)
-{
   
 }

@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v31 - Fixed an issue with DHT11 Sensors
     v30 - Added support for SSD1306 I2C Displays
     v29 - First Public Release
@@ -25,7 +26,7 @@
 
 Display* display = NULL;
 
-int currentVersion = 31; 
+int currentVersion = 32; 
 boolean printMemory = false;
 
 String board = "Generic";
@@ -70,6 +71,7 @@ extern int displayMode;
 
 extern uint8_t i2cSDAPort;
 extern uint8_t i2cSCLPort;
+extern MQTT* mqtt;
 
 #define tickerInterval 250
 #define delayInterval 10000
@@ -153,6 +155,8 @@ void runLoop() {
     case Init_Configuration:
     case Operating:
       loopRestserver();
+      if(mqtt!=NULL)
+        mqtt->loop();
       break;
   }
 }

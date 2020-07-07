@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -60,16 +61,14 @@ class SensorDHT : public Sensor {
     static DHT_Unified* dht15;
     static DHT_Unified* dht16;
     DHT_Unified* dht;
-    String _calcType;
     float lastPostedValue = NAN;
     static void portFix(uint8_t);
   protected:
     Data* read(bool);
     void preCycle(int);
-    void postCycle(int);
     boolean smartSensorCheck(float, float, boolean);
   public:
-    SensorDHT (long, String, String,String, uint8_t, String, int, int, float, SensorCalculation*);
+    SensorDHT (long, String, String, String,String, uint8_t, int, int, float, SensorCalculation*);
 };
 
 #endif

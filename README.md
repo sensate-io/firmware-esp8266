@@ -17,6 +17,7 @@ Find out more at https://www.sensate.io
 - Adafruit BME680 (https://github.com/adafruit/Adafruit_BME680 v1.0.7)
 - Max44009 (https://github.com/dantudose/MAX44009 v1.2.3)
 - BH1750 (https://github.com/claws/BH1750)
+- MQTT Client Library (https://github.com/knolleary/pubsubclient v2.8.0)
 
 Windows Users:
 Use https://github.com/nodemcu/nodemcu-flasher for flashing the firmware.

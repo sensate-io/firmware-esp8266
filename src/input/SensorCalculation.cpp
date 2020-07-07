@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -19,10 +20,26 @@
 
 extern Display* display;
 
-#define SEALEVELPRESSURE_HPA (1013.25)
-
-SensorCalculationApproxQuad::SensorCalculationApproxQuad(double calcValue1, double calcValue2, double calcValue3, double calcValue4, int portNumber)
+SensorCalculation::SensorCalculation()
 {
+
+}
+
+String SensorCalculation::getValueType()
+{
+  return _valueType;
+}
+
+String SensorCalculation::getValueUnit()
+{
+  return _valueUnit;
+}
+
+SensorCalculationApproxQuad::SensorCalculationApproxQuad(double calcValue1, double calcValue2, double calcValue3, double calcValue4, int portNumber) : SensorCalculation()
+{
+  _valueType = "temperature";
+  _valueUnit = "°C";
+
   _portNumber = portNumber;
   _calcValue1 = calcValue1;
   _calcValue2 = calcValue2;
@@ -30,252 +47,288 @@ SensorCalculationApproxQuad::SensorCalculationApproxQuad(double calcValue1, doub
   _calcValue4 = calcValue4;
 }
 
-SensorCalculationPT1001000::SensorCalculationPT1001000(double r0, int portNumber)
+SensorCalculationPT1001000::SensorCalculationPT1001000(double r0, int portNumber) : SensorCalculation()
 {
+  _valueType = "temperature";
+  _valueUnit = "°C";
+
   a = 0.0039083;
   b = -0.0000005775;
   _portNumber = portNumber;
   _r0 = r0;
 }
 
-SensorCalculationDualNtc::SensorCalculationDualNtc(double calcValue1, double calcValue2, int portNumber)
+SensorCalculationDualNtc::SensorCalculationDualNtc(double calcValue1, double calcValue2, int portNumber) : SensorCalculation()
 {
+  _valueType = "temperature";
+  _valueUnit = "°C";
+
   _portNumber = portNumber;
   _calcValue1 = calcValue1;
   _calcValue2 = calcValue2;
 }
 
-SensorCalculationDirectKelvin::SensorCalculationDirectKelvin(int portNumber)
+SensorCalculationDirectKelvin::SensorCalculationDirectKelvin(int portNumber) : SensorCalculation()
 {
+  _valueType = "temperature";
+  _valueUnit = "K";
+
   _portNumber = portNumber;
 }
 
-SensorCalculationDirectCelsius::SensorCalculationDirectCelsius(int portNumber)
+SensorCalculationDirectCelsius::SensorCalculationDirectCelsius(int portNumber) : SensorCalculation()
 {
+  _valueType = "temperature";
+  _valueUnit = "°C";
   _portNumber = portNumber;
 }
 
-SensorCalculationDirectPercent::SensorCalculationDirectPercent(int portNumber)
+SensorCalculationDirectPercent::SensorCalculationDirectPercent(int portNumber) : SensorCalculation()
 {
+  _valueType = "humidity";
+  _valueUnit = "%";
   _portNumber = portNumber;
 }
 
-SensorCalculationDirectHektoPascal::SensorCalculationDirectHektoPascal(int portNumber)
+SensorCalculationDirectHektoPascal::SensorCalculationDirectHektoPascal(int portNumber) : SensorCalculation()
 {
+  _valueType = "pressure";
+  _valueUnit = "hPa";
   _portNumber = portNumber;
 }
 
-SensorCalculationDirectMeter::SensorCalculationDirectMeter(int portNumber)
+SensorCalculationDirectMeter::SensorCalculationDirectMeter(int portNumber) : SensorCalculation()
 {
+  _valueType = "";
+  _valueUnit = "m";
   _portNumber = portNumber;
 }
 
-SensorCalculationDirectLux::SensorCalculationDirectLux(int portNumber)
+SensorCalculationDirectLux::SensorCalculationDirectLux(int portNumber) : SensorCalculation()
 {
+  _valueType = "illuminance";
+  _valueUnit = "lx";
   _portNumber = portNumber;
 }
 
-SensorCalculationDirectLumen::SensorCalculationDirectLumen(int portNumber)
+SensorCalculationDirectLumen::SensorCalculationDirectLumen(int portNumber) : SensorCalculation()
 {
+  _valueType = "flux";
+  _valueUnit = "lm";
   _portNumber = portNumber;
 }
 
-SensorCalculationDirectOhm::SensorCalculationDirectOhm(int portNumber)
+SensorCalculationDirectOhm::SensorCalculationDirectOhm(int portNumber) : SensorCalculation()
 {
+  _valueType = "resistance";
+  _valueUnit = "Ohm";
   _portNumber = portNumber;
 }
 
-SensorCalculationDirectKOhm::SensorCalculationDirectKOhm(int portNumber)
+SensorCalculationDirectKOhm::SensorCalculationDirectKOhm(int portNumber) : SensorCalculation()
 {
+  _valueType = "resistance";
+  _valueUnit = "kOhm";
   _portNumber = portNumber;
 }
 
-SensorCalculationDirectPPM::SensorCalculationDirectPPM(int portNumber)
+SensorCalculationDirectPPM::SensorCalculationDirectPPM(int portNumber) : SensorCalculation()
 {
+  _valueType = "concentration";
+  _valueUnit = "ppm";
   _portNumber = portNumber;
 }
 
-SensorCalculationDirectNone::SensorCalculationDirectNone(int portNumber)
+SensorCalculationDirectNone::SensorCalculationDirectNone(int portNumber) : SensorCalculation()
 {
+  _valueType = "unknown";
+  _valueUnit = "";
   _portNumber = portNumber;
 }
 
-
-SensorCalculationCalcAltitude::SensorCalculationCalcAltitude(int portNumber)
+SensorCalculationCalcAltitude::SensorCalculationCalcAltitude(int portNumber) : SensorCalculation()
 {
+  _valueType = "altitude";
+  _valueUnit = "m";
   _portNumber = portNumber;
 }
 
-SensorCalculationRawToPercent::SensorCalculationRawToPercent(float calcValue1, float calcValue2, int portNumber)
+SensorCalculationRawToPercent::SensorCalculationRawToPercent(float calcValue1, float calcValue2, int portNumber) : SensorCalculation()
 {
+  _valueType = "humidity";
+  _valueUnit = "%";
   _portNumber = portNumber;
   _calcValue1 = calcValue1;
   _calcValue2 = calcValue2;
 }
 
-SensorCalculationRaw::SensorCalculationRaw(int portNumber)
+SensorCalculationRaw::SensorCalculationRaw(int portNumber) : SensorCalculation()
 {
+  _valueType = "raw";
+  _valueUnit = "(raw))";
   _portNumber = portNumber;
 }
 
+Data* SensorCalculation::calculate(Sensor* sensor, float rawValue, bool postData)
+{
+  return NULL;
+}
 
-Data* SensorCalculationApproxQuad::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationApproxQuad::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   double v = log( (double)rawValue / _calcValue4);
   double z = _calcValue1 + (_calcValue2 * v) + (_calcValue3 * v * v);
-  float tempInK = (float) (1 / z);
+  float tempInC = (float) ((float) (1 / z) - 273.15);
 
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, tempInK, "K");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), tempInC, _valueUnit);
   
   if(!postData)
     return NULL;
-  return new Data (id, tempInK, "KELVIN");
+  return new Data (sensor, tempInC, "CELSIUS");
 }
 
-Data* SensorCalculationPT1001000::calculate(long id, String name, String shortName, float rT, bool postData)
+Data* SensorCalculationPT1001000::calculate(Sensor* sensor, float rT, bool postData)
 {
   double v2 = _r0*_r0*a*a;
   double v3 = 4*_r0*b*(_r0-rT);
   double v4 = sqrt(v2-v3);
 
   double v5 = 2*_r0*b;
-  double tempInC = (-_r0*a+v4)/v5;
-  float tempInK = (float) (tempInC + 273.15);
+  float tempInC = (float)(-_r0*a+v4)/v5;
 
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, tempInC, "°C");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), tempInC, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, tempInK, "KELVIN");
+  return new Data (sensor, tempInC, "CELSIUS");
 }
 
-Data* SensorCalculationDualNtc::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDualNtc::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   double x = 0.003354016;
   double y = log(rawValue / _calcValue2);
   double z = y / _calcValue1;
-  float tempInK = (float) (1.0 / (z + x));
+  float tempInC = (float) ((1.0 / (z + x))- 273.15);
 
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, tempInK, "K");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), tempInC, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, tempInK, "KELVIN");
+  return new Data (sensor, tempInC, "CELSIUS");
 }
 
-Data* SensorCalculationDirectKelvin::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectKelvin::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "K");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "KELVIN");
+  return new Data (sensor, rawValue, "KELVIN");
 }
 
-Data* SensorCalculationDirectCelsius::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectCelsius::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "°C");
-  float tempInK = rawValue+273.15;
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, tempInK, "KELVIN");
+  return new Data (sensor, rawValue, "CELSIUS");
 }
 
-Data* SensorCalculationDirectPercent::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectPercent::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "%");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "PERCENT");
+  return new Data (sensor, rawValue, "PERCENT");
 }
 
-Data* SensorCalculationDirectHektoPascal::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectHektoPascal::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "hPa");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "HEKTOPASCAL");
+  return new Data (sensor, rawValue, "HEKTOPASCAL");
 }
 
-Data* SensorCalculationDirectMeter::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectMeter::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "m");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "METER");
+  return new Data (sensor, rawValue, "METER");
 }
 
-Data* SensorCalculationDirectLux::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectLux::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "lx");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "LUX");
+  return new Data (sensor, rawValue, "LUX");
 }
 
-Data* SensorCalculationDirectLumen::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectLumen::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "lm");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "LUMEN");
+  return new Data (sensor, rawValue, "LUMEN");
 }
 
-Data* SensorCalculationDirectOhm::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectOhm::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "Ohm");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "OHM");
+  return new Data (sensor, rawValue, "OHM");
 }
 
-Data* SensorCalculationDirectKOhm::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectKOhm::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "kOhm");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "KOHM");
+  return new Data (sensor, rawValue, "KOHM");
 }
 
-Data* SensorCalculationDirectPPM::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectPPM::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "ppm");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "PPM");
+  return new Data (sensor, rawValue, "PPM");
 }
 
-Data* SensorCalculationDirectNone::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationDirectNone::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "NONE");
+  return new Data (sensor, rawValue, "NONE");
 }
 
-Data* SensorCalculationCalcAltitude::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationCalcAltitude::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  float altitude = 44330.0 * (1.0 - pow(rawValue / SEALEVELPRESSURE_HPA, 0.1903));
+  float altitude = 44330.0 * (1.0 - pow(rawValue / 1013.25, 0.1903));
   
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, altitude, "m");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), altitude, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, altitude, "METER");
+  return new Data (sensor, altitude, "METER");
 }
 
-Data* SensorCalculationRawToPercent::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationRawToPercent::calculate(Sensor* sensor, float rawValue, bool postData)
 {
   float min = _calcValue1;
   float max = _calcValue2;
@@ -287,17 +340,17 @@ Data* SensorCalculationRawToPercent::calculate(long id, String name, String shor
   if(percent>100) percent = 100.0;
   
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, percent, "%");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), percent, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, percent, "PERCENT");
+  return new Data (sensor, percent, "PERCENT");
 }
 
-Data* SensorCalculationRaw::calculate(long id, String name, String shortName, float rawValue, bool postData)
+Data* SensorCalculationRaw::calculate(Sensor* sensor, float rawValue, bool postData)
 {  
   if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, name, shortName, rawValue, "(raw)");
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (id, rawValue, "UNKNOWN");
+  return new Data (sensor, rawValue, "UNKNOWN");
 }

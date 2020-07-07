@@ -11,27 +11,51 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
 
 #include "SensorBMx280.h"
+#include "Wire.h"
 
 extern boolean isResetting;
 extern int powerMode;
 
-BME280I2C* SensorBMx280::bme = NULL;
+BME280I2C* SensorBMx280::bme76 = NULL;
+BME280I2C* SensorBMx280::bme77 = NULL;
 
-SensorBMx280::SensorBMx280 (long id, String shortName, String name, String PortSDA, String PortSCL, String calcType, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorBMx280::SensorBMx280 (long id, String category, String shortName, String name, String i2cAdress, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
 
   BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
   BME280::PresUnit presUnit(BME280::PresUnit_hPa);
   
-  if(bme == NULL)
+  if(i2cAdress=="0x77")
   {
-    bme = new BME280I2C();
+    if(bme77 == NULL)
+    {
+      BME280I2C::Settings settings(
+        BME280::OSR_X1,
+        BME280::OSR_X1,
+        BME280::OSR_X1,
+        BME280::Mode_Forced,
+        BME280::StandbyTime_1000ms,
+        BME280::Filter_16,
+        BME280::SpiEnable_False,
+        0x77
+      );
+      bme77 = new BME280I2C(settings);
+    }
+    bme = bme77;
   }
-    
+  else
+  {
+    if(bme76 == NULL)
+    {
+      bme76 = new BME280I2C();
+    }
+    bme = bme76;
+  }
 
   int i=0;
 
@@ -49,9 +73,6 @@ SensorBMx280::SensorBMx280 (long id, String shortName, String name, String PortS
 
     i++;
   }
-  
-  _calcType = calcType;
-
 }
 
 void SensorBMx280::preCycle(int cycleId)
@@ -62,29 +83,29 @@ Data* SensorBMx280::read(bool shouldPostData)
 {  
   if(!isResetting && bme != NULL)
   {
-    if(_calcType=="DIRECT_PERCENT")
+    if(_calculation->getValueType()=="humidity")
     {
       float humidity = bme->hum();
       shouldPostData = smartSensorCheck(humidity, _smartValueThreshold, shouldPostData);
-      return _calculation->calculate(_id, _name,  _shortName, humidity, shouldPostData);
+      return _calculation->calculate(this, humidity, shouldPostData);
     }
-    else if(_calcType=="DIRECT_CELSIUS")
-    {           
+    else if(_calculation->getValueType()=="temperature")
+    {          
        float tempC = bme->temp();
        shouldPostData = smartSensorCheck(tempC, _smartValueThreshold, shouldPostData);
-       return _calculation->calculate(_id, _name,  _shortName, tempC, shouldPostData);       
+       return _calculation->calculate(this, tempC, shouldPostData);       
     }
-    else if(_calcType=="DIRECT_HEKTOPASCAL")
-    {     
+    else if(_calculation->getValueType()=="pressure")
+    {    
        float pressure = bme->pres() / 100.0F;
        shouldPostData = smartSensorCheck(pressure, _smartValueThreshold, shouldPostData);
-       return _calculation->calculate(_id, _name,  _shortName, pressure, shouldPostData);  
+       return _calculation->calculate(this, pressure, shouldPostData);  
     }
-    else if(_calcType=="CALC_METER")
-    {      
+    else if(_calculation->getValueType()=="altitude")
+    {     
         float pressure = bme->pres() / 100.0F;
         shouldPostData = smartSensorCheck(pressure, _smartValueThreshold, shouldPostData);
-        return _calculation->calculate(_id, _name,  _shortName, pressure, shouldPostData);
+        return _calculation->calculate(this, pressure, shouldPostData);
     }
   }
  
@@ -111,10 +132,5 @@ boolean SensorBMx280::smartSensorCheck(float currentRawValue, float threshhold, 
   }
 
   return shouldPostData;
-  
-}
-
-void SensorBMx280::postCycle(int cycleId)
-{
   
 }

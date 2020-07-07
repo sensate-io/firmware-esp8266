@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -26,6 +27,7 @@
 #include "../controller/UUID.h"
 #include "../output/display/DisplayOLED128.h"
 #include "../communication/WiFiManager.h"
+#include "MQTT.h"
 
 void startRestServer();
 void loopRestserver();
@@ -42,6 +44,7 @@ void presentWiFiSetupScreen();
 void tryRestart();
 void restUpdateName();
 void handleAppleCaptivePortal();
+void initMqtt();
 
 String toStringIp(IPAddress ip);
 bool isIp(String str);

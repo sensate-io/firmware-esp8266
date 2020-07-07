@@ -12,36 +12,37 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
 
 #include "Data.h"
 
-Data::Data(long id, float value, String unit) {
+Data::Data(Sensor *sensor, float value, String unit) {
   _type = 1;
   _valueFloat = value;
-  _id = id;
+  _sensor = sensor;
   _unit = unit;
 }
 
-Data::Data(long id, int value, String unit) {
+Data::Data(Sensor *sensor, int value, String unit) {
   _type = 2;
   _valueInt = value;
-  _id = id;
+  _sensor = sensor;
   _unit = unit;
 }
 
-Data::Data(long id, boolean value, String unit) {
+Data::Data(Sensor *sensor, boolean value, String unit) {
   _type = 3;
   _valueBoolean = value;
-  _id = id;
+  _sensor = sensor;
   _unit = unit;
 }
 
 String Data::getRequestString() {
 
-  String returnString = String(_id) +",";
+  String returnString = String(_sensor->getId()) +",";
   
   if(_type==1)
     returnString = returnString + String(_valueFloat);
@@ -53,3 +54,19 @@ String Data::getRequestString() {
   return returnString+","+_unit;
   
 }
+
+String Data::getValueString() {
+
+  if(_type==1)
+    return String(_valueFloat);
+  else if(_type==2)
+    return String(_valueInt);
+  else if(_type==3)
+    return String(_valueBoolean);  
+
+  return "";
+}
+
+Sensor* Data::getSensor() {
+  return _sensor;
+} 

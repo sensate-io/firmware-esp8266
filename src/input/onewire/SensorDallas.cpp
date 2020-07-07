@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -72,7 +73,7 @@ DallasTemperature* SensorDallas::dallasTemperature16 = NULL;
 extern boolean isResetting;
 extern int powerMode;
 
-SensorDallas::SensorDallas (long id, String shortName, String name, uint8_t port, int channel, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorDallas::SensorDallas (long id, String category, String shortName, String name, uint8_t port, int channel, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
 
   _channel = channel;
 
@@ -268,7 +269,7 @@ SensorDallas::SensorDallas (long id, String shortName, String name, uint8_t port
 
   if(_channel<numberOfDevices)
     dallasTemperature->getAddress(_address, channel);
-  
+
 }
 
 void SensorDallas::preCycle(int cycleId)
@@ -300,7 +301,7 @@ Data* SensorDallas::read(bool shouldPostData)
     
     if(tempC!=-127.00 && tempC!=85.00) {
       shouldPostData = smartSensorCheck(tempC, 0.3f, shouldPostData);
-      return _calculation->calculate(_id, _name,  _shortName, tempC, shouldPostData);
+      return _calculation->calculate(this, tempC, shouldPostData);
     }
   }
 
@@ -328,10 +329,5 @@ boolean SensorDallas::smartSensorCheck(float currentRawValue, float threshhold, 
   }
 
   return shouldPostData;
-  
-}
-
-void SensorDallas::postCycle(int cycleId)
-{
   
 }

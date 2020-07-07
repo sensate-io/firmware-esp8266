@@ -12,6 +12,7 @@
 
     @section  HISTORY
     v29 - First Public Release
+    v32 - Added MQTT Support!
 */
 /**************************************************************************/
 
@@ -20,11 +21,11 @@
 extern boolean isResetting;
 extern int powerMode;
 
-SensorAnalogue::SensorAnalogue (long id, String shortName, String name, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorAnalogue::SensorAnalogue (long id, String category, String shortName, String name, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
 
 }
 
-SensorAnalogue::SensorAnalogue (long id, String shortName, String name, int rSplit, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorAnalogue::SensorAnalogue (long id, String category, String shortName, String name, int rSplit, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
 
 _rSplit = rSplit;
  
@@ -53,12 +54,12 @@ Data* SensorAnalogue::read(bool shouldPostData)
       {
         double rT = ((double) adc)*_rSplit/(1024-adc);
         shouldPostData = smartSensorCheck(rT, _smartValueThreshold, shouldPostData);
-        return _calculation->calculate(_id, _name, _shortName, rT, shouldPostData);
+        return _calculation->calculate(this, rT, shouldPostData);
       }
       else
       {
         shouldPostData = smartSensorCheck(adc, _smartValueThreshold, shouldPostData);
-        return _calculation->calculate(_id, _name, _shortName, adc, shouldPostData);
+        return _calculation->calculate(this, adc, shouldPostData);
       }
     }
   }
@@ -87,9 +88,4 @@ boolean SensorAnalogue::smartSensorCheck(float currentRawValue, float threshhold
   }
 
   return shouldPostData;
-  
-}
-
-void SensorAnalogue::postCycle(int cycleId)
-{
 }

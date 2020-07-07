@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -24,6 +25,7 @@
 #include "StateHelper.h"
 #include "UUID.h"
 #include "../communication/WiFiManager.h"
+#include "../communication/MQTT.h"
 #include "../input/Sensor.h"
 #include "../input/analog/SensorAnalogue.h"
 #include "../input/i2c/Ads1x15.h"
@@ -40,17 +42,18 @@ void restoreBridgeConfig();
 void restart();
 
 bool getBridgeConfig();
-void configureBridge(JsonObject& bridgeConfig);
-void configureExpansionPort(int portNumber, JsonObject& portConfig);
-void configurePort(int portNumber, JsonObject& portConfig);
-void addSensor(Sensor *sensor);
-void loopSensor(int currentTimeMs);
-boolean postSensorData(Data* data[], int dataCount);
+void configureBridge(JsonObject&);
+void configureExpansionPort(int, JsonObject&);
+void configurePort(int, JsonObject&);
+void addSensor(Sensor *);
+void loopSensor(int);
+boolean postSensorData(Data* data[], int);
 void checkStatus();
-void trySleep(long microseconds);
-void storeDisplayAndPowerConfig(boolean withPowerSettings);
+void trySleep(long);
+void storeDisplayAndPowerConfig(boolean);
 void doPowerSaving();
-void doPowerSavingInit(boolean doDelay);
-uint8_t translateGPIOPort(String gpioPort);
+void doPowerSavingInit(boolean);
+uint8_t translateGPIOPort(String);
+void tryInitMQTT();
 
 #endif

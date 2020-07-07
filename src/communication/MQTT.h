@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     Data.h
+    @file     MQTT.h
     @author   M. Fegerl (Sensate Digital Solutions GmbH)
     @license  GPL (see LICENSE file)
     The Sensate ESP8266 firmware is used to connect ESP8266 based hardware 
@@ -12,34 +12,37 @@
 
     @section  HISTORY
     v32 - Added MQTT Support!
-    v29 - First Public Release
 */
 /**************************************************************************/
 
 #include <Arduino.h>
+#include <PubSubClient.h>
+#include <ESP8266WiFi.h>
 
-#ifndef _Data_h_
-#define _Data_h_
+#ifndef _MQTT_h_
+#define _MQTT_h_
 
-#include "../input/Sensor.h"
+#include "../controller/UUID.h"
+#include "Data.h"
 
-class Sensor;
-
-class Data {
+class MQTT {
   private:
-    Sensor *_sensor;
-    float _valueFloat;
-    int _valueInt;
-    boolean _valueBoolean;
-    String _unit;
-    int _type;
+    unsigned long lastMillis;
+    String _brokerUrl;
+    long _brokerPort;
+    String _username;
+    String _password;
+    WiFiClient espClient;
+    PubSubClient* pubSubClient;
+    String clientId;
+    
   public:
-    Data(Sensor*, float, String);
-    Data(Sensor*, int, String);
-    Data(Sensor*, boolean, String);
-    String getValueString(void);
-    String getRequestString(void);
-    Sensor* getSensor(void);
+    MQTT (char*, long);
+    MQTT (char*, long, String, String);
+    bool connect(void);
+    void loop(void);
+    void publishSensorData(Data* data[], int);
+    void publishForAutoDiscovery(Sensor*);
 };
 
 #endif

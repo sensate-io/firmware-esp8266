@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -22,7 +23,7 @@ extern int powerMode;
 
 MAX44009* SensorMax44009::max44009;
 
-SensorMax44009::SensorMax44009 (long id, String shortName, String name, String PortSDA, String PortSCL, String calcType, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorMax44009::SensorMax44009 (long id, String category, String shortName, String name, String PortSDA, String PortSCL, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
 
   int i=0;
   failedInit = false;
@@ -41,9 +42,6 @@ SensorMax44009::SensorMax44009 (long id, String shortName, String name, String P
 
     i++;
   }
-  
-  _calcType = calcType;
-
 }
 
 void SensorMax44009::preCycle(int cycleId)
@@ -54,11 +52,11 @@ Data* SensorMax44009::read(bool shouldPostData)
 {  
   if(!isResetting && !failedInit)
   {
-    if(_calcType=="DIRECT_LUX")
+    if(_calculation->getValueType()=="illuminance")
     {
       float illuminance = max44009->get_lux();
       shouldPostData = smartSensorCheck(illuminance, _smartValueThreshold, shouldPostData);
-      return _calculation->calculate(_id, _name,  _shortName, illuminance, shouldPostData);
+      return _calculation->calculate(this, illuminance, shouldPostData);
     }
   }
   return NULL;
@@ -84,10 +82,5 @@ boolean SensorMax44009::smartSensorCheck(float currentRawValue, float threshhold
   }
 
   return shouldPostData;
-  
-}
-
-void SensorMax44009::postCycle(int cycleId)
-{
   
 }

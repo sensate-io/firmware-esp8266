@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -22,7 +23,7 @@ extern int powerMode;
 
 BH1750* SensorBH1750::bh1750;
 
-SensorBH1750::SensorBH1750 (long id, String shortName, String name, String PortSDA, String PortSCL, String calcType, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorBH1750::SensorBH1750 (long id, String category, String shortName, String name, String PortSDA, String PortSCL, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
 
   if(bh1750==NULL)
   {
@@ -30,9 +31,6 @@ SensorBH1750::SensorBH1750 (long id, String shortName, String name, String PortS
 
     bh1750->begin();
   }
-  
-  _calcType = calcType;
-
 }
 
 void SensorBH1750::preCycle(int cycleId)
@@ -43,14 +41,14 @@ Data* SensorBH1750::read(bool shouldPostData)
 {  
   if(!isResetting)
   {
-    if(_calcType=="DIRECT_LUX")
+    if(_calculation->getValueType()=="illuminance")
     {
       float illuminance = bh1750->readLightLevel();
 
       if(illuminance>=0)
       {
         shouldPostData = smartSensorCheck(illuminance, _smartValueThreshold, shouldPostData);
-        return _calculation->calculate(_id, _name,  _shortName, illuminance, shouldPostData);
+        return _calculation->calculate(this, illuminance, shouldPostData);
       }
       else
         Serial.println("NAN Illuminance!");
@@ -80,10 +78,5 @@ boolean SensorBH1750::smartSensorCheck(float currentRawValue, float threshhold, 
   }
 
   return shouldPostData;
-  
-}
-
-void SensorBH1750::postCycle(int cycleId)
-{
   
 }

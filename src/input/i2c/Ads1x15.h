@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -40,10 +41,9 @@ class Ads1x15 : public Sensor {
   protected:
     Data* read(bool);
     void preCycle(int);
-    void postCycle(int);
     boolean smartSensorCheck(float, float, boolean);
   public:
-    Ads1x15 (long, String, String, String, String, int, int, int, int, int, float, SensorCalculation*);
+    Ads1x15 (long, String, String, String, String, String, int, int, int, int, int, float, SensorCalculation*);
 };
 
 #endif

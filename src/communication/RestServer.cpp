@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -26,6 +27,7 @@ extern const byte DNS_PORT;
 extern const char *myHostname;
 extern Display* display;
 extern String bridgeURL;
+extern MQTT* mqtt;
 
 void startRestServer() {
   Serial.println("startRestServer");
@@ -46,6 +48,7 @@ void configRestServerRouting() {
     http_rest_server.on("/resetbridge", HTTP_GET, resetBridgeConfig);           //Remove SSID and Password and restart Device to use SoftAP
     http_rest_server.on("/uuid", HTTP_GET, restGetUuid);              //Welcome and return Device UUID if Hint is correct
     http_rest_server.on("/updateName", HTTP_PUT, restUpdateName);
+    http_rest_server.on("/initMqtt", HTTP_PUT, initMqtt);
     http_rest_server.on("/restart", HTTP_GET,tryRestart);
     http_rest_server.on("/identify", HTTP_GET,tryIdentify);
     state=Register;
@@ -166,7 +169,110 @@ void restUpdateName() {
   {
     http_rest_server.send(400);
   }
-  
+}
+
+void initMqtt() {
+
+  Serial.println("initMqtt");
+
+  String requestUUID = http_rest_server.arg("uuid");
+
+  if(requestUUID!=NULL && requestUUID.equals(getUUID()))
+  {
+      String mqttBrokerUrl = http_rest_server.arg("brokerUrl");
+      String mqttBrokerPortString = http_rest_server.arg("brokerPort");
+      String mqttUsername = http_rest_server.arg("username");
+      String mqttPassword = http_rest_server.arg("password");
+
+      EEPROM.begin(398);
+
+      if(mqttBrokerUrl!=NULL && mqttBrokerUrl.length()>0)
+      {
+        Serial.println("Setting MQTT Broker Url: "+mqttBrokerUrl+" and port: "+mqttBrokerPortString);
+
+        EEPROM.write(314, 114);
+        EEPROM.write(315, 115);
+
+        yield();
+
+        char mqttBrokerUrlChars[36];
+        mqttBrokerUrl.toCharArray(mqttBrokerUrlChars, 36);
+        EEPROM.put(316, mqttBrokerUrlChars);
+
+        if(mqttBrokerPortString==NULL || mqttBrokerPortString.length()==0)
+        {
+          mqttBrokerPortString = "1883";
+        }
+
+        char mqttBrokerPortChars[5];
+        mqttBrokerPortString.toCharArray(mqttBrokerPortChars,5);
+        long mqttBrokerPort = atol(mqttBrokerPortChars);
+        EEPROM.put(352, mqttBrokerPort);
+
+        if(mqttUsername!=NULL && mqttUsername.length()>0 && mqttPassword!=NULL && mqttPassword.length()>0)
+        {
+          Serial.println("Setting mqttAuth User: "+mqttUsername + " and password.");
+
+          EEPROM.write(356, 156);
+          EEPROM.write(357, 157);
+
+          yield();
+
+          char mqttUsernameChars[20];
+          mqttUsername.toCharArray(mqttUsernameChars, 20);
+          EEPROM.put(358, mqttUsernameChars);
+
+          char mqttPasswordChars[20];
+          mqttPassword.toCharArray(mqttPasswordChars, 20);
+
+          EEPROM.put(378, mqttPasswordChars);
+
+          yield();
+        }
+        else
+        {
+          Serial.println("Disabling MQTT Auth.");
+
+          EEPROM.write(356, 0);
+          EEPROM.write(357, 0);
+
+          mqtt = NULL;
+
+          yield();
+        }
+
+      }
+      else
+      {
+        Serial.println("Disabling MQTT.");
+
+        EEPROM.write(314, 0);
+        EEPROM.write(315, 0);
+        EEPROM.write(356, 0);
+        EEPROM.write(357, 0);
+
+        mqtt = NULL;
+
+        yield();
+      }
+
+      EEPROM.end();
+
+      yield();
+
+      tryInitMQTT();
+
+      yield();
+
+      http_rest_server.send(200);
+      http_rest_server.client().stop();
+
+      return;
+  }
+
+  Serial.println("Invalid/missing Bridge Identifier!");
+  http_rest_server.send(401);
+  http_rest_server.client().stop();
 
 }
 

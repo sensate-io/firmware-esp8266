@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v32 - Added MQTT Support!
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -19,13 +20,14 @@
 
 extern unsigned long nextSensorDue;
 
-Sensor::Sensor (long id, String shortName, String name, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) {
+Sensor::Sensor (long id, String category, String shortName, String name, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) {
   lastTick = -1;
   lastPost = -1;
   _refreshInterval = refreshInterval;
   _postDataInterval = postDataInterval;
   _name = name;
   _shortName = shortName;
+  _category = category;
   _id = id;
   _calculation = calculation;
   _smartValueThreshold = smartValueThreshold;
@@ -39,6 +41,10 @@ int Sensor::getPostDataInterval() {
   return _postDataInterval;
 }
 
+String Sensor::getCategory() {
+  return _category;
+}
+
 String Sensor::getShortName() {
   return _shortName;
 }
@@ -47,22 +53,32 @@ String Sensor::getName() {
   return _name;
 }
 
+String Sensor::getMqttClass() {
+
+if(_calculation==NULL)
+  return "unknown";
+
+  return _calculation->getValueType();
+}
+
+String Sensor::getMqttUnit() {
+  if(_calculation==NULL)
+    return "?";
+
+  return _calculation->getValueUnit();
+}
+
 long Sensor::getId() {
   return _id;
 }
 
 void Sensor::preCycle(int cycleId)
 {
-  Serial.println("Base Sensor Pre Cycle");
+  Serial.println("Base Sensor Pre Cycle: " + String(cycleId));
 }
 
 Data* Sensor::read(bool shouldPostData) {
   Serial.println("Base Sensor Read: " + getName());
-}
-
-void Sensor::postCycle(int cycleId)
-{
-  Serial.println("Base Sensor Post Cycle");
 }
 
 Data* Sensor::trySensorRead(unsigned long currentTimeMillis, int cycleId) {
@@ -79,23 +95,28 @@ Data* Sensor::trySensorRead(unsigned long currentTimeMillis, int cycleId) {
 
 Data* Sensor::forceSensorRead(unsigned long currentTimeMillis, int cycleId) {
 
+  preCycle(cycleId);
+
   bool shouldPostData = false;
   if(lastPost==-1 || (lastPost + _postDataInterval <= currentTimeMillis))
   {
     shouldPostData = true;
-    lastPost = currentTimeMillis;
   }
-
-  preCycle(cycleId);
+  
   Data *d =  read(shouldPostData);
   lastTick = currentTimeMillis;
-  postCycle(cycleId);
-
+  if(shouldPostData)
+  {
+    if (d!=NULL)
+    {
+      lastPost = currentTimeMillis;
+    }
+  }
+  
   if(nextSensorDue==-1 || nextSensorDue < currentTimeMillis || (nextSensorDue > currentTimeMillis+_postDataInterval))
   {
     nextSensorDue = currentTimeMillis+_postDataInterval;
   }
-    
 
   return d;
 
