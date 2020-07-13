@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Improved MQTT Setup Routine
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -28,6 +29,7 @@ extern const char *myHostname;
 extern Display* display;
 extern String bridgeURL;
 extern MQTT* mqtt;
+extern boolean enableMQTT;
 
 void startRestServer() {
   Serial.println("startRestServer");
@@ -240,6 +242,7 @@ void initMqtt() {
 
           yield();
         }
+        enableMQTT=true;
 
       }
       else
@@ -252,6 +255,7 @@ void initMqtt() {
         EEPROM.write(357, 0);
 
         mqtt = NULL;
+        enableMQTT=false;
 
         yield();
       }
