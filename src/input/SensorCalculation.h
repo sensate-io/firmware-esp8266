@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -38,6 +39,7 @@ class SensorCalculation {
     String getValueUnit();
     SensorCalculation();
     virtual Data* calculate(Sensor* sensor, float, bool);
+    virtual Data* calculate(Sensor* sensor, bool, bool);
 };
 
 class SensorCalculationApproxQuad : public SensorCalculation  {
@@ -148,6 +150,8 @@ class SensorCalculationRaw : public SensorCalculation  {
   public:
     SensorCalculationRaw(int);
     Data* calculate(Sensor* sensor, float, bool);
+    Data* calculate(Sensor* sensor, bool, bool);
 };
+
 
 #endif

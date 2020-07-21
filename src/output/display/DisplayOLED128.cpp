@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Added Digital Sensor Switch Support
     v30 - Added Support for SSD1306 Displays
     v29 - First Public Release
 */
@@ -176,25 +177,53 @@ void Display::drawValue(int position, String name, String shortName, float value
     firstSensorData=false;
   }
 
+  String valueString = String(value) + " " + unit;
+
   switch(displayMode)
   {
     case 1:
-      drawValueQuad(position, name, shortName, value, unit);
+      drawValueQuad(position, name, shortName, valueString);
       break;
     default:
-      drawValueClassic(position, name, shortName, value, unit);
+      drawValueClassic(position, name, shortName, valueString);
       break;
   }
 
 }
 
-void Display::drawValueClassic(int position, String name, String shortName, float value, String unit) {
+void Display::drawValue(int position, String name, String shortName, bool value, String onString, String offString) {
+
+  if(firstSensorData)
+  {
+    clear(true);
+    firstSensorData=false;
+  }
+
+  String boolString;
+    if(value)
+      boolString = onString;
+    else
+      boolString = offString; 
+
+  switch(displayMode)
+  {
+    case 1:
+      drawValueQuad(position, name, shortName, boolString);
+      break;
+    default:
+      drawValueClassic(position, name, shortName, boolString);
+      break;
+  }
+
+}
+
+void Display::drawValueClassic(int position, String name, String shortName, String valueString) {
 
   if(!isResetting && displayEnabled)
   {
-    String text = name+": "+value + " "+unit;
+    String text = name+": "+valueString;
     if(display->getStringWidth(text)>=128)
-      text = shortName+": "+value + " "+unit;
+      text = shortName+": "+valueString;
 
     display->setColor(BLACK);
     display->fillRect(0, position*16, 128, 16);
@@ -205,7 +234,7 @@ void Display::drawValueClassic(int position, String name, String shortName, floa
   
 }
 
-void Display::drawValueQuad(int position, String name, String shortName, float value, String unit) {
+void Display::drawValueQuad(int position, String name, String shortName, String valueString) {
 
   if(!isResetting && displayEnabled)
   {
@@ -246,7 +275,7 @@ void Display::drawValueQuad(int position, String name, String shortName, float v
 
     display->drawString(x, y, label);
 
-    String text = String(value)+" "+unit;
+    String text = valueString;
     x = x+(w/2)-(display->getStringWidth(text)/2);
 
     display->drawString(x,y+16,text);

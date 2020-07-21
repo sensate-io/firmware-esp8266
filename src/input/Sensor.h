@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Changes for Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -38,10 +39,11 @@ class Sensor {
     String _shortName;
     long _id;
     SensorCalculation* _calculation;
+    bool _binary;
     virtual void preCycle(int);
     virtual Data* read(bool);
   public:
-    Sensor (long, String, String, String, int, int, float, SensorCalculation*);
+    Sensor (long, String, String, String, int, int, float, SensorCalculation*, bool binary);
     int getRefreshInterval(void);
     int getPostDataInterval(void);
     long getId(void);
@@ -50,6 +52,7 @@ class Sensor {
     String getCategory(void);
     String getMqttClass(void);
     String getMqttUnit(void);
+    bool isBinary();
     Data* trySensorRead(unsigned long, int);
     Data* forceSensorRead(unsigned long, int);
 };

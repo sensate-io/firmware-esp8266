@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Changes for Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -29,7 +30,7 @@ int SensorBME680::lastReadCycleId = 0;
 #define BME_MOSI 11
 #define BME_CS 10
 
-SensorBME680::SensorBME680 (long id, String category, String shortName, String name, String PortSDA, String PortSCL, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorBME680::SensorBME680 (long id, String category, String shortName, String name, String PortSDA, String PortSCL, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation, false) {
   
   if(bme == NULL)
   {

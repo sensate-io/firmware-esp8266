@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Changes for Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -25,7 +26,7 @@ extern int powerMode;
 BME280I2C* SensorBMx280::bme76 = NULL;
 BME280I2C* SensorBMx280::bme77 = NULL;
 
-SensorBMx280::SensorBMx280 (long id, String category, String shortName, String name, String i2cAdress, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorBMx280::SensorBMx280 (long id, String category, String shortName, String name, String i2cAdress, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation, false) {
 
   BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
   BME280::PresUnit presUnit(BME280::PresUnit_hPa);

@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
 */
 /**************************************************************************/
@@ -90,15 +91,31 @@ bool MQTT::connect()
 
 void MQTT::publishForAutoDiscovery(Sensor* sensor)
 {
-    String pTopic = "homeassistant/sensor/"+clientId+"/"+String(sensor->getId())+"/config";
+    String pTopic;
+    
+    if(sensor->isBinary())
+    {
+        pTopic = "homeassistant/binary_sensor/"+clientId+"/"+String(sensor->getId())+"/config";
+    }
+    else
+     pTopic = "homeassistant/sensor/"+clientId+"/"+String(sensor->getId())+"/config";
+
     String category = sensor->getCategory();
     String pPayload;
 
     if(category==NULL)
         category = "Unnamed";
 
-    if(sensor->getMqttClass()=="resistance" || sensor->getMqttClass()=="altitude" || sensor->getMqttClass()=="flux" || sensor->getMqttClass()=="")
-        pPayload = "{\"name\": \""+sensor->getName()+"\", \"state_topic\": \"Sensate/"+category+"/"+sensor->getName()+"/value\", \"unit_of_measurement\": \""+sensor->getMqttUnit()+"\"}";
+    if(sensor->getMqttClass()=="resistance" || sensor->getMqttClass()=="altitude" || sensor->getMqttClass()=="flux" || sensor->getMqttClass()=="" || sensor->getMqttClass()=="raw")
+    {
+             pPayload = "{\"name\": \""+sensor->getName()+"\", \"state_topic\": \"Sensate/"+category+"/"+sensor->getName()+"/value\"";
+             if(sensor->isBinary())
+                pPayload = pPayload + ", \"payload_on\": \"1\", \"payload_off\": \"0\"}";
+             else
+             {
+                 pPayload = pPayload + ", \"unit_of_measurement\": \""+sensor->getMqttUnit()+"\"}";
+             }
+    }   
     else
         pPayload = "{\"name\": \""+sensor->getName()+"\", \"device_class\": \""+sensor->getMqttClass()+"\", \"state_topic\": \"Sensate/"+category+"/"+sensor->getName()+"/value\", \"unit_of_measurement\": \""+sensor->getMqttUnit()+"\"}";
         

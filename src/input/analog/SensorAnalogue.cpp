@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Changes for Digital Sensor Switch Support
     v29 - First Public Release
     v32 - Added MQTT Support!
 */
@@ -21,11 +22,11 @@
 extern boolean isResetting;
 extern int powerMode;
 
-SensorAnalogue::SensorAnalogue (long id, String category, String shortName, String name, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorAnalogue::SensorAnalogue (long id, String category, String shortName, String name, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation, false) {
 
 }
 
-SensorAnalogue::SensorAnalogue (long id, String category, String shortName, String name, int rSplit, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorAnalogue::SensorAnalogue (long id, String category, String shortName, String name, int rSplit, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation, false) {
 
 _rSplit = rSplit;
  
@@ -54,7 +55,7 @@ Data* SensorAnalogue::read(bool shouldPostData)
       {
         double rT = ((double) adc)*_rSplit/(1024-adc);
         shouldPostData = smartSensorCheck(rT, _smartValueThreshold, shouldPostData);
-        return _calculation->calculate(this, rT, shouldPostData);
+        return _calculation->calculate(this, (float)rT, shouldPostData);
       }
       else
       {

@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Changes for Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -20,7 +21,7 @@
 
 extern unsigned long nextSensorDue;
 
-Sensor::Sensor (long id, String category, String shortName, String name, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) {
+Sensor::Sensor (long id, String category, String shortName, String name, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation, bool binary) {
   lastTick = -1;
   lastPost = -1;
   _refreshInterval = refreshInterval;
@@ -31,6 +32,7 @@ Sensor::Sensor (long id, String category, String shortName, String name, int ref
   _id = id;
   _calculation = calculation;
   _smartValueThreshold = smartValueThreshold;
+  _binary = binary;
 }
 
 int Sensor::getRefreshInterval() {
@@ -66,6 +68,10 @@ String Sensor::getMqttUnit() {
     return "?";
 
   return _calculation->getValueUnit();
+}
+
+bool Sensor::isBinary() {
+  return _binary;
 }
 
 long Sensor::getId() {

@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -33,6 +34,11 @@ String SensorCalculation::getValueType()
 String SensorCalculation::getValueUnit()
 {
   return _valueUnit;
+}
+
+Data* SensorCalculation::calculate(Sensor* sensor, bool boolValue, bool postData)
+{  
+    return NULL;
 }
 
 SensorCalculationApproxQuad::SensorCalculationApproxQuad(double calcValue1, double calcValue2, double calcValue3, double calcValue4, int portNumber) : SensorCalculation()
@@ -165,7 +171,7 @@ SensorCalculationRawToPercent::SensorCalculationRawToPercent(float calcValue1, f
 SensorCalculationRaw::SensorCalculationRaw(int portNumber) : SensorCalculation()
 {
   _valueType = "raw";
-  _valueUnit = "(raw))";
+  _valueUnit = "";
   _portNumber = portNumber;
 }
 
@@ -353,4 +359,13 @@ Data* SensorCalculationRaw::calculate(Sensor* sensor, float rawValue, bool postD
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "UNKNOWN");
+}
+
+Data* SensorCalculationRaw::calculate(Sensor* sensor, bool boolValue, bool postData)
+{  
+  if(display!=NULL && _portNumber>=0)
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), boolValue, "ON", "OFF");
+  if(!postData)
+    return NULL;
+  return new Data (sensor, boolValue, "NONE");
 }

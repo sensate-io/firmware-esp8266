@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -707,7 +708,7 @@ void configurePort(int portNumber, JsonObject& portConfig) {
   
   Serial.println("Configure Onboard Port:" + port);
 
-  // portConfig.prettyPrintTo(Serial);
+  portConfig.prettyPrintTo(Serial);
 
   SensorCalculation* calc = NULL;
 
@@ -775,6 +776,15 @@ void configurePort(int portNumber, JsonObject& portConfig) {
     else
     {
       addSensor(new SensorAnalogue (portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], 0, refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+    }
+  }
+  else
+  {
+    uint8_t intPort = translateGPIOPort(port);
+    if(intPort!=-1)
+    {
+      Serial.println("Setting up Digital Switch at Port: " + port);
+      addSensor(new SensorDigitalSwitch(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], intPort, refreshInterval, postDataInterval, calc));
     }
   }
 }

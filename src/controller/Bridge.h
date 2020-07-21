@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -28,6 +29,7 @@
 #include "../communication/MQTT.h"
 #include "../input/Sensor.h"
 #include "../input/analog/SensorAnalogue.h"
+#include "../input/SensorDigitalSwitch.h"
 #include "../input/i2c/Ads1x15.h"
 #include "../input/i2c/SensorBMx280.h"
 #include "../input/i2c/SensorBME680.h"

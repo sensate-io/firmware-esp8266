@@ -11,7 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
-    v33 - Improved MQTT Setup Routine
+    v33 - Added Digital Sensor Switch Support, Improved MQTT Setup Routine
     v32 - Added MQTT Support!
     v31 - Fixed an issue with DHT11 Sensors
     v30 - Added support for SSD1306 I2C Displays
@@ -30,11 +30,11 @@ Display* display = NULL;
 int currentVersion = 33; 
 boolean printMemory = false;
 
-// String board = "Generic";
-// char firmwareType[] = "ESP8266";
+String board = "Generic";
+char firmwareType[] = "ESP8266";
 
-String board = "NodeMCU";
-char firmwareType[] = "ESP8266-NodeMCU";
+// String board = "NodeMCU";
+// char firmwareType[] = "ESP8266-NodeMCU";
 
 // String board = "ESP12s";
 // char firmwareType[] = "ESP8266-ESP12s";

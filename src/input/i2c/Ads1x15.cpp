@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Changes for Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -29,7 +30,7 @@ Adafruit_ADS1015* Ads1x15::ads1x15_4B = NULL;
 
 extern int powerMode;
 
-Ads1x15::Ads1x15 (long id, String category, String shortName, String name, String type, String addressString, int channel, int preResistor, int postResistor, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+Ads1x15::Ads1x15 (long id, String category, String shortName, String name, String type, String addressString, int channel, int preResistor, int postResistor, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation, false) {
 
   _channel = channel;
   numberOfSamples = 10;

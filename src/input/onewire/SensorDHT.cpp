@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Changes for Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v31 - Fixed an issue with DHT11 Sensors
     v29 - First Public Release
@@ -58,7 +59,7 @@ DHT_Unified* SensorDHT::dht16 = NULL;
 extern boolean isResetting;
 extern int powerMode;
 
-SensorDHT::SensorDHT (long id, String category, String shortName, String name, String dhtType, uint8_t port, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation) {
+SensorDHT::SensorDHT (long id, String category, String shortName, String name, String dhtType, uint8_t port, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation, false) {
 
   uint8_t type;
 

@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Added Digital Sensor Switch Support
     v30 - Added Support for SSD1306 Displays
     v29 - First Public Release
 */
@@ -127,8 +128,9 @@ class Display {
     void drawConnected(bool update);
     void flip(int rotation);
     void drawValue(int position, String name, String shortName, float value, String unit);
-    void drawValueClassic(int position, String name, String shortName, float value, String uit);
-    void drawValueQuad(int position, String name, String shortName, float value, String unit);
+    void drawValue(int position, String name, String shortName, bool value, String onString, String offString);
+    void drawValueClassic(int position, String name, String shortName, String valueString);
+    void drawValueQuad(int position, String name, String shortName, String valueString);
     int getType();
 };
 

@@ -12,6 +12,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */
@@ -49,7 +50,13 @@ String Data::getRequestString() {
   else if(_type==2)
     returnString = returnString + String(_valueInt);
   else if(_type==3)
-    returnString = returnString + String(_valueBoolean);  
+  {
+    if(_valueBoolean)
+      returnString = returnString + "true";
+    else
+      returnString = returnString + "false";
+      
+  }
   
   return returnString+","+_unit;
   
