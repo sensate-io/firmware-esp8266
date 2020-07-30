@@ -37,9 +37,9 @@ String getUUID() {
 
 void restoreUUID() {
 
-  digitalWrite(D0, HIGH);
+  digitalWrite(16, HIGH);
   delay(300);
-  digitalWrite(D0, LOW);
+  digitalWrite(16, LOW);
   delay(300);
 
   int val0 = EEPROM.read(0);
