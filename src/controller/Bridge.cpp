@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
@@ -604,6 +605,9 @@ void tryInitMQTT() {
 
 void configureExpansionPort(int portNumber, JsonObject& portConfig) {
   Serial.println("Configure Expansion Port: ");
+
+  portConfig.prettyPrintTo(Serial);
+  Serial.println("");
   
   SensorCalculation* calc = NULL;
 
@@ -641,6 +645,8 @@ void configureExpansionPort(int portNumber, JsonObject& portConfig) {
     calc = new SensorCalculationRawToPercent(portConfig["c1"], portConfig["c2"], portNumber);
   else if (portConfig["s"]["cf"] == "RAW")
     calc = new SensorCalculationRaw(portNumber);
+  else if (portConfig["s"]["cf"] == "CALC_RAW_VREF")
+    calc = new SensorCalculationRawToVoltage(portConfig["c1"], portConfig["c2"], portNumber);
 
   if(calc==NULL)
   {
@@ -709,6 +715,7 @@ void configurePort(int portNumber, JsonObject& portConfig) {
   Serial.println("Configure Onboard Port:" + port);
 
   portConfig.prettyPrintTo(Serial);
+  Serial.println("");
 
   SensorCalculation* calc = NULL;
 
@@ -746,6 +753,8 @@ void configurePort(int portNumber, JsonObject& portConfig) {
     calc = new SensorCalculationRawToPercent(portConfig["c1"], portConfig["c2"], portNumber);
   else if (portConfig["s"]["cf"] == "RAW")
     calc = new SensorCalculationRaw(portNumber);
+  else if (portConfig["s"]["cf"] == "CALC_RAW_VREF")
+    calc = new SensorCalculationRawToVoltage(portConfig["c1"], portConfig["c2"], portNumber);
     
   if(calc==NULL)
   {

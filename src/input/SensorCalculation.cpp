@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
@@ -161,8 +162,17 @@ SensorCalculationCalcAltitude::SensorCalculationCalcAltitude(int portNumber) : S
 
 SensorCalculationRawToPercent::SensorCalculationRawToPercent(float calcValue1, float calcValue2, int portNumber) : SensorCalculation()
 {
-  _valueType = "humidity";
+  _valueType = "plevel";
   _valueUnit = "%";
+  _portNumber = portNumber;
+  _calcValue1 = calcValue1;
+  _calcValue2 = calcValue2;
+}
+
+SensorCalculationRawToVoltage::SensorCalculationRawToVoltage(float calcValue1, float calcValue2, int portNumber) : SensorCalculation()
+{
+  _valueType = "voltage";
+  _valueUnit = "V";
   _portNumber = portNumber;
   _calcValue1 = calcValue1;
   _calcValue2 = calcValue2;
@@ -352,17 +362,32 @@ Data* SensorCalculationRawToPercent::calculate(Sensor* sensor, float rawValue, b
   return new Data (sensor, percent, "PERCENT");
 }
 
+Data* SensorCalculationRawToVoltage::calculate(Sensor* sensor, float rawValue, bool postData)
+{
+  float refVoltage = _calcValue1;
+  float maxADCValue = _calcValue2;
+
+  float rawVoltage = rawValue / maxADCValue;
+  float vResult = rawVoltage * refVoltage;
+  
+  if(display!=NULL && _portNumber>=0)
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), vResult, _valueUnit);
+  if(!postData)
+    return NULL;
+  return new Data (sensor, vResult, "VOLT");
+}
+
 Data* SensorCalculationRaw::calculate(Sensor* sensor, float rawValue, bool postData)
 {  
   if(display!=NULL && _portNumber>=0)
     display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
   if(!postData)
     return NULL;
-  return new Data (sensor, rawValue, "UNKNOWN");
+  return new Data (sensor, rawValue, "NONE");
 }
 
 Data* SensorCalculationRaw::calculate(Sensor* sensor, bool boolValue, bool postData)
-{  
+{
   if(display!=NULL && _portNumber>=0)
     display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), boolValue, "ON", "OFF");
   if(!postData)

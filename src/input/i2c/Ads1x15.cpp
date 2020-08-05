@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v34 - Added Generic Analog Sensor Support
     v33 - Changes for Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
@@ -41,8 +42,13 @@ Ads1x15::Ads1x15 (long id, String category, String shortName, String name, Strin
     if (!init48)
     {
       init48 = true;
-      ads1x15_48 = new Adafruit_ADS1015(0x48);
-      ads1x15_48->setGain(GAIN_ONE);
+
+      if(type == "ADS1115")
+        ads1x15_48 = new Adafruit_ADS1115(0x48);
+      else
+        ads1x15_48 = new Adafruit_ADS1015(0x48);
+
+      ads1x15_48->setGain(GAIN_TWOTHIRDS);
       ads1x15_48->begin();
     }
     ads1x15 = ads1x15_48;
@@ -51,8 +57,13 @@ Ads1x15::Ads1x15 (long id, String category, String shortName, String name, Strin
     if (!init49)
     {
       init49 = true;
-      ads1x15_49 = new Adafruit_ADS1015(0x49);
-      ads1x15_49->setGain(GAIN_ONE);
+
+      if(type == "ADS1115")
+        ads1x15_48 = new Adafruit_ADS1115(0x49);
+      else
+        ads1x15_49 = new Adafruit_ADS1015(0x49);
+
+      ads1x15_49->setGain(GAIN_TWOTHIRDS);
       ads1x15_49->begin();
     }
     ads1x15 = ads1x15_49;
@@ -62,8 +73,13 @@ Ads1x15::Ads1x15 (long id, String category, String shortName, String name, Strin
     if (!init4A)
     {
       init4A = true;
-      ads1x15_4A = new Adafruit_ADS1015(0x4A);
-      ads1x15_4A->setGain(GAIN_ONE);
+
+      if(type == "ADS1115")
+        ads1x15_48 = new Adafruit_ADS1115(0x4A);
+      else
+        ads1x15_4A = new Adafruit_ADS1015(0x4A);
+
+      ads1x15_4A->setGain(GAIN_TWOTHIRDS);
       ads1x15_4A->begin();
     }
     ads1x15 = ads1x15_4A;
@@ -72,8 +88,13 @@ Ads1x15::Ads1x15 (long id, String category, String shortName, String name, Strin
     if (!init4B)
     {
       init4B = true;
-      ads1x15_4B = new Adafruit_ADS1015(0x4B);
-      ads1x15_4B->setGain(GAIN_ONE);
+
+      if(type == "ADS1115")
+        ads1x15_48 = new Adafruit_ADS1115(0x4B);
+      else
+        ads1x15_4B = new Adafruit_ADS1015(0x4B);
+
+      ads1x15_4B->setGain(GAIN_TWOTHIRDS);
       ads1x15_4B->begin();
     }
     ads1x15 = ads1x15_4B;
@@ -93,7 +114,7 @@ Data* Ads1x15::read(bool shouldPostData)
   for (int i = 0; i < numberOfSamples; i++)
   {
     adcMax = adcMax + (float) ads1x15->readADC_SingleEnded(0);
-    
+
     if (_channel == 1)
       adc = adc + (float) ads1x15->readADC_SingleEnded(1);
     if (_channel == 2)
@@ -108,9 +129,8 @@ Data* Ads1x15::read(bool shouldPostData)
   if (adc >= adcMax-20)
     adc = adcMax;
 
-  if(_preResistor!=0 && _postResistor!=0)
+  if((_preResistor!=0 && _postResistor!=0) || (_preResistor==0 && _postResistor==0))
   {
-    adc = adc/adcMax*1024;
     shouldPostData = smartSensorCheck(adc, _smartValueThreshold, shouldPostData);
     return _calculation->calculate(this, adc, shouldPostData);
   }

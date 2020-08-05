@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
@@ -151,6 +152,14 @@ class SensorCalculationRaw : public SensorCalculation  {
     SensorCalculationRaw(int);
     Data* calculate(Sensor* sensor, float, bool);
     Data* calculate(Sensor* sensor, bool, bool);
+};
+
+class SensorCalculationRawToVoltage : public SensorCalculation  {
+  private:
+    float _calcValue1,_calcValue2;
+  public:
+    SensorCalculationRawToVoltage(float, float, int);
+    Data* calculate(Sensor* sensor, float, bool);
 };
 
 

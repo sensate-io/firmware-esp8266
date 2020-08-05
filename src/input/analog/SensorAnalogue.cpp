@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v34 - Added Generic Analog Sensor Support
     v33 - Changes for Digital Sensor Switch Support
     v29 - First Public Release
     v32 - Added MQTT Support!
@@ -44,16 +45,16 @@ Data* SensorAnalogue::read(bool shouldPostData)
 
     for (int i = 0; i < 10; i++)
     {
-        adc = adc + (float) analogRead(0); // ADC = A0
+      adc = adc + (float) analogRead(0); // ADC = A0
     }
 
-    adc = adc / (float)10;
+    adc = adc / 10.0;
     
     if(!std::isinf(adc))
     {
       if(_rSplit!=0)
       {
-        double rT = ((double) adc)*_rSplit/(1024-adc);
+        double rT = ((double) adc)*_rSplit/(1023-adc);
         shouldPostData = smartSensorCheck(rT, _smartValueThreshold, shouldPostData);
         return _calculation->calculate(this, (float)rT, shouldPostData);
       }

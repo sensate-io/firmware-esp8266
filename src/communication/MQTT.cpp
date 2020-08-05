@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
 */
@@ -106,7 +107,7 @@ void MQTT::publishForAutoDiscovery(Sensor* sensor)
     if(category==NULL)
         category = "Unnamed";
 
-    if(sensor->getMqttClass()=="resistance" || sensor->getMqttClass()=="altitude" || sensor->getMqttClass()=="flux" || sensor->getMqttClass()=="" || sensor->getMqttClass()=="raw")
+    if(sensor->getMqttClass()=="plevel" || sensor->getMqttClass()=="resistance" || sensor->getMqttClass()=="altitude" || sensor->getMqttClass()=="flux" || sensor->getMqttClass()=="" || sensor->getMqttClass()=="raw" || sensor->getMqttClass()=="voltage")
     {
              pPayload = "{\"name\": \""+sensor->getName()+"\", \"state_topic\": \"Sensate/"+category+"/"+sensor->getName()+"/value\"";
              if(sensor->isBinary())

@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support, Improved MQTT Setup Routine
     v32 - Added MQTT Support!
     v31 - Fixed an issue with DHT11 Sensors
@@ -27,7 +28,7 @@
 
 Display* display = NULL;
 
-int currentVersion = 33; 
+int currentVersion = 34; 
 boolean printMemory = false;
 
 String board = "Generic";
