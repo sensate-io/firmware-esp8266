@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
@@ -35,6 +36,8 @@
 #include "../input/i2c/SensorBME680.h"
 #include "../input/i2c/SensorMax44009.h"
 #include "../input/i2c/SensorBH1750.h"
+#include "../input/i2c/SensorVEML6075.h"
+#include "../input/i2c/SensorSI1145.h"
 #include "../input/onewire/SensorDHT.h"
 #include "../input/onewire/SensorDallas.h"
 #include "../output/display/DisplayOLED128.h"

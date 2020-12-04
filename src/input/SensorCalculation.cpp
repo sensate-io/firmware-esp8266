@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
@@ -153,6 +154,13 @@ SensorCalculationDirectNone::SensorCalculationDirectNone(int portNumber) : Senso
   _portNumber = portNumber;
 }
 
+SensorCalculationDirectWpm2::SensorCalculationDirectWpm2(int portNumber) : SensorCalculation()
+{
+  _valueType = "irradiance";
+  _valueUnit = "W/m²";
+  _portNumber = portNumber;
+}
+
 SensorCalculationCalcAltitude::SensorCalculationCalcAltitude(int portNumber) : SensorCalculation()
 {
   _valueType = "altitude";
@@ -181,6 +189,13 @@ SensorCalculationRawToVoltage::SensorCalculationRawToVoltage(float calcValue1, f
 SensorCalculationRaw::SensorCalculationRaw(int portNumber) : SensorCalculation()
 {
   _valueType = "raw";
+  _valueUnit = "";
+  _portNumber = portNumber;
+}
+
+SensorCalculationRaw::SensorCalculationRaw(int portNumber, String valueUnit) : SensorCalculation()
+{
+  _valueType = valueUnit;
   _valueUnit = "";
   _portNumber = portNumber;
 }
@@ -322,6 +337,15 @@ Data* SensorCalculationDirectPPM::calculate(Sensor* sensor, float rawValue, bool
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "PPM");
+}
+
+Data* SensorCalculationDirectWpm2::calculate(Sensor* sensor, float rawValue, bool postData)
+{
+  if(display!=NULL && _portNumber>=0)
+    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(!postData)
+    return NULL;
+  return new Data (sensor, rawValue, "WPM2");
 }
 
 Data* SensorCalculationDirectNone::calculate(Sensor* sensor, float rawValue, bool postData)

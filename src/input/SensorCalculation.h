@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
@@ -133,6 +134,12 @@ class SensorCalculationDirectPPM : public SensorCalculation  {
     Data* calculate(Sensor* sensor, float, bool);
 };
 
+class SensorCalculationDirectWpm2 : public SensorCalculation  {
+  public:
+    SensorCalculationDirectWpm2(int);
+    Data* calculate(Sensor* sensor, float, bool);
+};
+
 class SensorCalculationCalcAltitude : public SensorCalculation  {
   public:
     SensorCalculationCalcAltitude(int);
@@ -150,6 +157,7 @@ class SensorCalculationRawToPercent : public SensorCalculation  {
 class SensorCalculationRaw : public SensorCalculation  {
   public:
     SensorCalculationRaw(int);
+    SensorCalculationRaw(int, String);
     Data* calculate(Sensor* sensor, float, bool);
     Data* calculate(Sensor* sensor, bool, bool);
 };

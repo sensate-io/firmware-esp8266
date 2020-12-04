@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
@@ -40,7 +41,7 @@ extern struct rst_info resetInfo;
 
 extern String name;
 extern String board;
-extern String type;
+extern String ucType;
 
 extern long powerOnDelay;
 extern String powerSavePort;
@@ -110,7 +111,7 @@ bool registerBridge()
         pwdHashString = String(pwdHashString);
       }
       
-      String message = "{\"uuid\":\"" + uuid + "\",\"networkIP\":\"" + networkIP + "\",\"name\":\"" + name + "\",\"vendor\":\"" + board + "\",\"type\":\"" + type + "\",\"firmwareVersion\":" + currentVersion + ",\"secPassword\":\"" + pwdHashString + "\"}";
+      String message = "{\"uuid\":\"" + uuid + "\",\"networkIP\":\"" + networkIP + "\",\"name\":\"" + name + "\",\"vendor\":\"" + board + "\",\"type\":\"" + ucType + "\",\"firmwareVersion\":" + currentVersion + ",\"secPassword\":\"" + pwdHashString + "\"}";
 
       int httpCode = httpClient.POST(message);
 
@@ -639,12 +640,20 @@ void configureExpansionPort(int portNumber, JsonObject& portConfig) {
     calc = new SensorCalculationDirectPPM(portNumber);  
   else if (portConfig["s"]["cf"] == "DIRECT_NONE")
     calc = new SensorCalculationDirectNone(portNumber);
+  else if (portConfig["s"]["cf"] == "DIRECT_WPM2")
+    calc = new SensorCalculationDirectWpm2(portNumber);
   else if (portConfig["s"]["cf"] == "CALC_METER")
     calc = new SensorCalculationCalcAltitude(portNumber);
   else if (portConfig["s"]["cf"] == "CALC_RAW_PERCENT")
     calc = new SensorCalculationRawToPercent(portConfig["c1"], portConfig["c2"], portNumber);
   else if (portConfig["s"]["cf"] == "RAW")
     calc = new SensorCalculationRaw(portNumber);
+  else if (portConfig["s"]["cf"] == "RAW_A")
+    calc = new SensorCalculationRaw(portNumber, "a");
+  else if (portConfig["s"]["cf"] == "RAW_B")
+    calc = new SensorCalculationRaw(portNumber, "b");
+  else if (portConfig["s"]["cf"] == "RAW_C")
+    calc = new SensorCalculationRaw(portNumber, "c");
   else if (portConfig["s"]["cf"] == "CALC_RAW_VREF")
     calc = new SensorCalculationRawToVoltage(portConfig["c1"], portConfig["c2"], portNumber);
 
@@ -705,6 +714,14 @@ void configureExpansionPort(int portNumber, JsonObject& portConfig) {
   {    
     addSensor(new SensorBH1750(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["ec1"], portConfig["ec2"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
   }
+  else if (portConfig["et"] == "VEML6075")
+  {    
+    addSensor(new SensorVEML6075(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["ec1"], portConfig["ec2"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+  }
+  else if (portConfig["et"] == "SI1145")
+  {    
+    addSensor(new SensorSI1145(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["ec1"], portConfig["ec2"], refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
+  }
   
 }
 
@@ -747,12 +764,20 @@ void configurePort(int portNumber, JsonObject& portConfig) {
     calc = new SensorCalculationDirectPPM(portNumber);
   else if (portConfig["s"]["cf"] == "DIRECT_NONE")
     calc = new SensorCalculationDirectNone(portNumber);
+  else if (portConfig["s"]["cf"] == "DIRECT_WPM2")
+    calc = new SensorCalculationDirectWpm2(portNumber);
   else if (portConfig["s"]["cf"] == "CALC_METER")
     calc = new SensorCalculationCalcAltitude(portNumber);
   else if (portConfig["s"]["cf"] == "CALC_RAW_PERCENT")
     calc = new SensorCalculationRawToPercent(portConfig["c1"], portConfig["c2"], portNumber);
   else if (portConfig["s"]["cf"] == "RAW")
     calc = new SensorCalculationRaw(portNumber);
+  else if (portConfig["s"]["cf"] == "RAW_A")
+    calc = new SensorCalculationRaw(portNumber, "a");
+  else if (portConfig["s"]["cf"] == "RAW_B")
+    calc = new SensorCalculationRaw(portNumber, "b");
+  else if (portConfig["s"]["cf"] == "RAW_C")
+    calc = new SensorCalculationRaw(portNumber, "c");
   else if (portConfig["s"]["cf"] == "CALC_RAW_VREF")
     calc = new SensorCalculationRawToVoltage(portConfig["c1"], portConfig["c2"], portNumber);
     
