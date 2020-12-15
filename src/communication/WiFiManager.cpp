@@ -146,6 +146,7 @@ void checkWiFiStatus() {
       display->drawString(0, 21, String(ssidChars));
     }
 
+    Serial.println("softAPdisconnect()");
     WiFi.softAPdisconnect (true);
 
     Serial.println("Connected, IP address: ");
@@ -401,6 +402,8 @@ void startDNS() {
 }
 
 void shutDownWiFi() {
+  Serial.println("shutDownWiFi()");
+
   yield();
   delay(1000);
 

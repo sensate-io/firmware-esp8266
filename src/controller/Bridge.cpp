@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v36 - Added WiFi-Fix Auto-reboot
     v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support
@@ -20,6 +21,10 @@
 /**************************************************************************/
 
 #include "Bridge.h"
+
+#define ssl_fingerprint_prod "E9 A9 3D E2 AD AB C2 96 FA 3C A7 A8 57 DE 8E A0 95 59 9B 7A" //hub.sensate.cloud
+#define ssl_fingerprint_test "E3 19 E5 F3 DA 1A BD 01 EB BC 08 E6 49 18 7D 54 66 BD 2B 12" //test.sensate.cloud
+#define maxSensorCount 25
 
 extern State state;
 extern bool isResetting;
@@ -57,9 +62,7 @@ unsigned long nextSensorDue = -1;
 
 char pwdHash[41] = "";
 
-#define ssl_fingerprint_prod "E9 A9 3D E2 AD AB C2 96 FA 3C A7 A8 57 DE 8E A0 95 59 9B 7A" //hub.sensate.cloud
-#define ssl_fingerprint_test "E3 19 E5 F3 DA 1A BD 01 EB BC 08 E6 49 18 7D 54 66 BD 2B 12" //test.sensate.cloud
-#define maxSensorCount 25
+
 
 String bridgeURL;
 
@@ -71,6 +74,7 @@ bool serverError = false;
 
 int registerRetry = 0;
 int configRetry = 0;
+int postSensorDataRetry = 0;
 int sensorCycle = 1;
 
 bool registerBridge()
@@ -84,6 +88,9 @@ bool registerBridge()
     
   String uuid = getUUID();
   String networkIP = WiFi.localIP().toString();
+
+  Serial.print("HEAP 1: ");
+  Serial.println(ESP.getFreeHeap());
 
   if (uuid.length() > 0 && networkIP.length() > 0)
   {
@@ -104,6 +111,9 @@ bool registerBridge()
       httpClient.addHeader("Content-Type", "application/json");
       httpClient.setTimeout(5000);
 
+      Serial.print("HEAP 2: ");
+      Serial.println(ESP.getFreeHeap());
+
       String pwdHashString = "";
 
       if(pwdHash[0]!=0xff)
@@ -114,6 +124,9 @@ bool registerBridge()
       String message = "{\"uuid\":\"" + uuid + "\",\"networkIP\":\"" + networkIP + "\",\"name\":\"" + name + "\",\"vendor\":\"" + board + "\",\"type\":\"" + ucType + "\",\"firmwareVersion\":" + currentVersion + ",\"secPassword\":\"" + pwdHashString + "\"}";
 
       int httpCode = httpClient.POST(message);
+
+      Serial.print("HEAP 3: ");
+      Serial.println(ESP.getFreeHeap());
 
       if (httpCode == HTTP_CODE_OK)
       {
@@ -135,7 +148,9 @@ bool registerBridge()
       else
       {
         registerRetry++;
+        
         Serial.println("Register failed..? - HTTP:" + String(httpCode));
+        Serial.println("Retry #"+String(registerRetry)+", restart at 25");
         if(registerRetry>=10)
         {
           if(powerMode==2)
@@ -151,6 +166,7 @@ bool registerBridge()
             restart();
             return false;
           }
+          
         }
       }
       
@@ -405,11 +421,20 @@ bool getBridgeConfig() {
   httpClient.end();
 
   configRetry++;
+  Serial.println("Retry #"+String(configRetry)+", restart at 25");
+
   if(configRetry>=10 && powerMode==2)
   {
     Serial.println("Fetching configuration not possible, going back to Deep Sleep for 5 minutes.");
     trySleep(300000000);
   }
+  else if(configRetry>=25)
+  {
+    configRetry=0;
+    restart();
+  }
+
+    
   return false;
 
 }
@@ -1125,6 +1150,16 @@ boolean postSensorData(Data* data[], int dataCount)
     Serial.println(WiFi.status());
 
     httpClient.end();
+
+    postSensorDataRetry++;
+
+    if(postSensorDataRetry>=25)
+    {
+      postSensorDataRetry=0;
+      restart();
+    }
+
+    Serial.println("Retry #"+String(postSensorDataRetry)+", restart at 25");
   }
   return false;
 }
