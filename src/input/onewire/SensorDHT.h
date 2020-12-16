@@ -62,7 +62,6 @@ class SensorDHT : public Sensor {
     static DHT_Unified* dht16;
     DHT_Unified* dht;
     float lastPostedValue = NAN;
-    static void portFix(uint8_t);
   protected:
     Data* read(bool);
     void preCycle(int);
