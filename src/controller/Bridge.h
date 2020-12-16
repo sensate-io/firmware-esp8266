@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v36 - Greatly improved reliability of connectivity
     v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v33 - Added Digital Sensor Switch Support
     v32 - Added MQTT Support!
@@ -20,6 +21,7 @@
 
 #include <Esp.h>
 #include <EEPROM.h>
+#include <WiFiClientSecureBearSSL.h>
 
 #ifndef _Bridge_h_
 #define _Bridge_h_

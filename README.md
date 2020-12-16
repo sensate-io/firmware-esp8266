@@ -5,7 +5,7 @@ Find out more at https://www.sensate.io
 
 # The Sensate Firmware for ESP8266 currently uses the following Libraries:
 
-- Arduino IDE ESP8266 Base Library (https://github.com/esp8266/Arduino v2.5.2)
+- Arduino IDE ESP8266 Base Library (https://github.com/esp8266/Arduino v2.7.4)
 - ArduinoJson (https://github.com/bblanchon/ArduinoJson v5.13.5)
 - Thingpulse SSD1306 (https://github.com/ThingPulse/esp8266-oled-ssd1306 v4.0.0)
 - Soligen2010 fork of Adafruit_ADS1x15 (https://github.com/soligen2010/Adafruit_ADS1X15) v1.2.1

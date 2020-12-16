@@ -22,8 +22,9 @@
 
 #include "Bridge.h"
 
-#define ssl_fingerprint_prod "E9 A9 3D E2 AD AB C2 96 FA 3C A7 A8 57 DE 8E A0 95 59 9B 7A" //hub.sensate.cloud
-#define ssl_fingerprint_test "E3 19 E5 F3 DA 1A BD 01 EB BC 08 E6 49 18 7D 54 66 BD 2B 12" //test.sensate.cloud
+const uint8_t ssl_fingerprint_prod[20] = {0xE9, 0xA9, 0x3D, 0xE2, 0xAD, 0xAB, 0xC2, 0x96, 0xFA, 0x3C, 0xA7, 0xA8, 0x57, 0xDE, 0x8E, 0xA0, 0x95, 0x59, 0x9B, 0x7A}; //hub.sensate.cloud
+const uint8_t ssl_fingerprint_test[20] = {0xE3, 0x19, 0xE5, 0xF3, 0xDA, 0x1A, 0xBD, 0x01, 0xEB, 0xBC, 0x08, 0xE6, 0x49, 0x18, 0x7D, 0x54, 0x66, 0xBD, 0x2B, 0x12}; //test.sensate.cloud
+
 #define maxSensorCount 25
 
 extern State state;
@@ -62,8 +63,6 @@ unsigned long nextSensorDue = -1;
 
 char pwdHash[41] = "";
 
-
-
 String bridgeURL;
 
 Sensor *sensors[maxSensorCount];
@@ -77,6 +76,8 @@ int configRetry = 0;
 int postSensorDataRetry = 0;
 int sensorCycle = 1;
 
+std::unique_ptr<BearSSL::WiFiClientSecure>sslClient(new BearSSL::WiFiClientSecure);
+
 bool registerBridge()
 {
   if(display!=NULL)
@@ -89,9 +90,6 @@ bool registerBridge()
   String uuid = getUUID();
   String networkIP = WiFi.localIP().toString();
 
-  Serial.print("HEAP 1: ");
-  Serial.println(ESP.getFreeHeap());
-
   if (uuid.length() > 0 && networkIP.length() > 0)
   {
     Serial.println("Registering Bridge " + uuid + " to Bridge located at " + bridgeURL);
@@ -101,18 +99,16 @@ bool registerBridge()
 
       String urlString = bridgeURL + "/" + apiVersion + "/bridge/";
 
+      sslClient->setBufferSizes(1024, 1024);
       if(urlString.startsWith("https://hub"))
-        httpClient.begin(urlString, ssl_fingerprint_prod);
+        sslClient->setFingerprint(ssl_fingerprint_prod);
       else if(urlString.startsWith("https://test"))
-        httpClient.begin(urlString, ssl_fingerprint_test);
-      else
-        httpClient.begin(urlString);
-        
+        sslClient->setFingerprint(ssl_fingerprint_test);
+
+      httpClient.begin(*sslClient, urlString);
+
       httpClient.addHeader("Content-Type", "application/json");
       httpClient.setTimeout(5000);
-
-      Serial.print("HEAP 2: ");
-      Serial.println(ESP.getFreeHeap());
 
       String pwdHashString = "";
 
@@ -123,13 +119,12 @@ bool registerBridge()
       
       String message = "{\"uuid\":\"" + uuid + "\",\"networkIP\":\"" + networkIP + "\",\"name\":\"" + name + "\",\"vendor\":\"" + board + "\",\"type\":\"" + ucType + "\",\"firmwareVersion\":" + currentVersion + ",\"secPassword\":\"" + pwdHashString + "\"}";
 
+      Serial.print("p");
       int httpCode = httpClient.POST(message);
-
-      Serial.print("HEAP 3: ");
-      Serial.println(ESP.getFreeHeap());
 
       if (httpCode == HTTP_CODE_OK)
       {
+        Serial.print("o");
         String payload = httpClient.getString();
         if (payload == uuid)
         {
@@ -141,12 +136,14 @@ bool registerBridge()
       }
       else if (httpCode == HTTP_CODE_UPGRADE_REQUIRED)
       {
+        Serial.print("u");
         httpClient.end();
         restart();
         return false;
       }
       else
       {
+        Serial.print("e");
         registerRetry++;
         
         Serial.println("Register failed..? - HTTP:" + String(httpCode));
@@ -345,19 +342,16 @@ bool getBridgeConfig() {
 
   String urlString = bridgeURL + "/" + apiVersion + "/bridge/" + getUUID();
 
-  if(urlString.startsWith("https://hub"))
-    httpClient.begin(urlString, ssl_fingerprint_prod);
-  else if(urlString.startsWith("https://test"))
-    httpClient.begin(urlString, ssl_fingerprint_test);
-  else
-    httpClient.begin(urlString);
+  httpClient.begin(*sslClient, urlString);
 
   httpClient.addHeader("Content-Type", "application/json");
     
+  Serial.print("g");  
   int httpCode = httpClient.GET();
 
   if (httpCode == HTTP_CODE_OK)
   {
+    Serial.print("o");
     String payload = httpClient.getString();
 
     int portNumber = 0;
@@ -420,6 +414,7 @@ bool getBridgeConfig() {
 
   httpClient.end();
 
+  Serial.print("e");
   configRetry++;
   Serial.println("Retry #"+String(configRetry)+", restart at 25");
 
@@ -1084,23 +1079,23 @@ boolean postSensorData(Data* data[], int dataCount)
 
   String urlString = bridgeURL + "/" + apiVersion + "/data/" + getUUID() + "/" + requestDataString;
 
-  if(urlString.startsWith("https://hub"))
-    httpClient.begin(urlString, ssl_fingerprint_prod);
-  else if(urlString.startsWith("https://test"))
-    httpClient.begin(urlString, ssl_fingerprint_test);
-  else
-    httpClient.begin(urlString);
-  
+  httpClient.begin(*sslClient, urlString);
+
+  Serial.print("p");
+
   int httpCode = httpClient.PUT("");
 
   if (httpCode == HTTP_CODE_UPGRADE_REQUIRED)
   {
+    Serial.print("u");
     httpClient.end();
     restart();
     return true;
   }
   else if (httpCode == HTTP_CODE_OK)
   {
+    Serial.print("o");
+
     if(serverError || wasDisconnected)
     {
       serverError = false;
@@ -1137,6 +1132,8 @@ boolean postSensorData(Data* data[], int dataCount)
   }
   else
   {
+    Serial.print("e");
+
     if(display!=NULL)
     {
       wasDisconnected=true;

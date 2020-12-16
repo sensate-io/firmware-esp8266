@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v36 - Greatly improved reliability of connectivity
     v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support, Improved MQTT Setup Routine
@@ -29,7 +30,7 @@
 
 Display* display = NULL;
 
-int currentVersion = 35; 
+int currentVersion = 36; 
 boolean printMemory = false;
 
 String board = "Generic";
