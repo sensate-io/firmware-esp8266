@@ -78,6 +78,16 @@ int sensorCycle = 1;
 
 std::unique_ptr<BearSSL::WiFiClientSecure>sslClient(new BearSSL::WiFiClientSecure);
 
+bool initSSL()
+{
+  sslClient->setBufferSizes(512, 512);
+
+  if(bridgeURL.startsWith("https://hub"))
+    sslClient->setFingerprint(ssl_fingerprint_prod);
+  else if(bridgeURL.startsWith("https://test"))
+    sslClient->setFingerprint(ssl_fingerprint_test);
+}
+
 bool registerBridge()
 {
   if(display!=NULL)
@@ -99,14 +109,7 @@ bool registerBridge()
 
       String urlString = bridgeURL + "/" + apiVersion + "/bridge/";
 
-      sslClient->setBufferSizes(1024, 1024);
-      if(urlString.startsWith("https://hub"))
-        sslClient->setFingerprint(ssl_fingerprint_prod);
-      else if(urlString.startsWith("https://test"))
-        sslClient->setFingerprint(ssl_fingerprint_test);
-
       httpClient.begin(*sslClient, urlString);
-
       httpClient.addHeader("Content-Type", "application/json");
       httpClient.setTimeout(5000);
 
@@ -416,6 +419,7 @@ bool getBridgeConfig() {
 
   Serial.print("e");
   configRetry++;
+  Serial.println("Fetch config failed..? - HTTP:" + String(httpCode));
   Serial.println("Retry #"+String(configRetry)+", restart at 25");
 
   if(configRetry>=10 && powerMode==2)
@@ -1098,6 +1102,7 @@ boolean postSensorData(Data* data[], int dataCount)
 
     if(serverError || wasDisconnected)
     {
+      postSensorDataRetry=0;
       serverError = false;
       wasDisconnected = false;
       if(display!=NULL)

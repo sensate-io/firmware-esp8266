@@ -30,15 +30,15 @@
 
 Display* display = NULL;
 
-int currentVersion = 36; 
+int currentVersion = 37; 
 boolean printMemory = false;
 
-String board = "Generic";
-char firmwareType[] = "ESP8266";
+// String board = "Generic";
+// char firmwareType[] = "ESP8266";
 // char firmwareType[] = "ESP8266-1M";
 
 // String board = "NodeMCU";
-// char firmwareType[] = "ESP8266-NodeMCU";
+// char firmwareType[] = "ESP8266-NodeMCU-pp";
 
 // String board = "ESP12s";
 // char firmwareType[] = "ESP8266-ESP12s";
@@ -46,8 +46,8 @@ char firmwareType[] = "ESP8266";
 // String board = "ESP07";
 // char firmwareType[] = "ESP8266-ESP07";
 
-// String board = "D1Mini";
-// char firmwareType[] = "ESP8266-D1Mini";
+String board = "D1Mini";
+char firmwareType[] = "ESP8266-D1Mini";
 
 extern String name = "Bridge";
 extern String ucType = "ESP8266";
@@ -232,11 +232,13 @@ void initSensate() {
     if(resetInfo.reason != REASON_DEEP_SLEEP_AWAKE)
     {
       Serial.println("STATE: Register_Bridge");
+      initSSL();
       registerBridge();
     }
     else 
     {
       Serial.println("Skip Register_Bridge (Wake from Sleep)");
+      initSSL();
       state=Init_Configuration;
     }
   }

@@ -44,6 +44,7 @@
 #include "../input/onewire/SensorDallas.h"
 #include "../output/display/DisplayOLED128.h"
 
+bool initSSL();
 bool registerBridge();
 void restoreBridgeConfig();
 void restart();
