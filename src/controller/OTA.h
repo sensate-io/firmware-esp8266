@@ -24,6 +24,6 @@
 
 #include "Bridge.h"
 
-void tryFirmwareUpdate();
+void tryFirmwareUpdate(String fwUpdateToken);
 
 #endif

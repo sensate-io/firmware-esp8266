@@ -28,7 +28,7 @@
 
 Display* display = NULL;
 
-int currentVersion = 34; 
+int currentVersion = 38; 
 boolean printMemory = false;
 
 String board = "Generic";
@@ -205,7 +205,7 @@ void initSensate() {
     if(resetInfo.reason != REASON_DEEP_SLEEP_AWAKE)
     {
       Serial.println("STATE: Check_Firmware");
-      tryFirmwareUpdate();
+      tryFirmwareUpdate("");
     }
     else
     {

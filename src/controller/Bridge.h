@@ -25,6 +25,7 @@
 
 #include "StateHelper.h"
 #include "UUID.h"
+#include "OTA.h"
 #include "../communication/WiFiManager.h"
 #include "../communication/MQTT.h"
 #include "../input/Sensor.h"

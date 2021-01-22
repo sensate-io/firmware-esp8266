@@ -352,6 +352,23 @@ bool getBridgeConfig() {
     {
       JsonObject& bridgeConfig = jsonBuffer.parseObject(payload);
 
+      if(bridgeConfig.containsKey("mv"))
+      {
+        int minimalVersion = bridgeConfig["mv"];
+        if(currentVersion < minimalVersion)
+        {
+          Serial.println("Firmware Version is "+String(currentVersion)+" but required: "+String(minimalVersion));
+          String fwUpdateToken = bridgeConfig["ut"];
+          if(fwUpdateToken!=NULL)
+          {
+            tryFirmwareUpdate(fwUpdateToken);
+          }
+          else
+          {
+            Serial.println("MISSING FW Update Token, canceling update!");
+          }
+        }
+      }
       if(bridgeConfig.containsKey("p"))
       {
         configureBridge(bridgeConfig);

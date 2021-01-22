@@ -2,3 +2,5 @@
 /.vscode
 /.DS_Store
 /archive
+/src/input/.DS_Store
+/src/input/i2c/.DS_Store
