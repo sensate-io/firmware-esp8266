@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v39 - ReAdded Support for VEML6075 and SI1145 UVI Sensors, added auto-reinit if sensor fails
     v35 - Added Support for VEML6075 and SI1145 UVI Sensors
 */
 /**************************************************************************/
@@ -24,7 +25,8 @@
 class SensorVEML6075 : public Sensor {
   private:
     static Adafruit_VEML6075 *veml6075;
-    boolean failedInit;
+    static boolean failedInit;
+    static int lastCycleId;
     float lastPostedValue = NAN;
   protected:
     Data* read(bool);

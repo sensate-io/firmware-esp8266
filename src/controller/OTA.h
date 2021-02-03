@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v38 - Changed automatic Update to only if required Update
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -24,6 +25,6 @@
 
 #include "Bridge.h"
 
-void tryFirmwareUpdate();
+void tryFirmwareUpdate(String fwUpdateToken);
 
 #endif

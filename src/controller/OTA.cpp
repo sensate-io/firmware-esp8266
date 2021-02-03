@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v38 - Changed automatic Update to only if required Update
     v29 - First Public Release
 */
 /**************************************************************************/
@@ -24,7 +25,7 @@ extern bool isResetting;
 extern char firmwareType[];
 extern int currentVersion; 
 
-void tryFirmwareUpdate() {
+void tryFirmwareUpdate(String fwUpdateToken) {
 
   t_httpUpdate_return ret;
   ESPhttpUpdate.rebootOnUpdate(false);
@@ -39,7 +40,7 @@ void tryFirmwareUpdate() {
     display->drawString(20, 21, "Update...");
   }
 
-  String updatePath = "/v1/bridge/firmware?version="+String(currentVersion)+"&type="+firmwareType;
+  String updatePath = "/v1/bridge/firmware/"+fwUpdateToken+"?version="+String(currentVersion)+"&type="+firmwareType;
 
   Serial.println(updatePath);
   
@@ -71,6 +72,7 @@ void tryFirmwareUpdate() {
         break;
   }
 
-  state = Connected_WiFi;
+  if(state==Check_Firmware)
+    state = Connected_WiFi;
 
 }

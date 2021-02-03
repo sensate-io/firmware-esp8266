@@ -11,6 +11,8 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v39 - ReAdded Support for VEML6075 and SI1145 UVI Sensors, added auto-reinit if sensor fails
+    v38 - Changed automatic Update to only if required Update, removed VEML6075 and SI1145 UV Sensors
     v36 - Greatly improved reliability of connectivity
     v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v34 - Added Generic Analog Sensor Support
@@ -30,11 +32,11 @@
 
 Display* display = NULL;
 
-int currentVersion = 37; 
+int currentVersion = 39; 
 boolean printMemory = false;
 
-// String board = "Generic";
-// char firmwareType[] = "ESP8266";
+String board = "Generic";
+char firmwareType[] = "ESP8266";
 // char firmwareType[] = "ESP8266-1M";
 
 // String board = "NodeMCU";
@@ -46,8 +48,8 @@ boolean printMemory = false;
 // String board = "ESP07";
 // char firmwareType[] = "ESP8266-ESP07";
 
-String board = "D1Mini";
-char firmwareType[] = "ESP8266-D1Mini";
+// String board = "D1Mini";
+// char firmwareType[] = "ESP8266-D1Mini";
 
 extern String name = "Bridge";
 extern String ucType = "ESP8266";
@@ -208,7 +210,7 @@ void initSensate() {
     if(resetInfo.reason != REASON_DEEP_SLEEP_AWAKE)
     {
       Serial.println("STATE: Check_Firmware");
-      tryFirmwareUpdate();
+      tryFirmwareUpdate("");
     }
     else
     {

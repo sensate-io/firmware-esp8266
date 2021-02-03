@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v39 - ReAdded Support for VEML6075 and SI1145 UVI Sensors, added auto-reinit if sensor fails
     v35 - Added Support for VEML6075 and SI1145 UVI Sensors
 */
 /**************************************************************************/
@@ -23,18 +24,13 @@ extern int powerMode;
 // Adafruit_SI1145* SensorSI1145::si1145;
 SI1145_WE* SensorSI1145::si1145;
 int SensorSI1145::lastCycleId = -1;
-boolean SensorSI1145::failedInit = false;
+boolean SensorSI1145::failedInit = true;
 
 SensorSI1145::SensorSI1145 (long id, String category, String shortName, String name, String PortSDA, String PortSCL, int refreshInterval, int postDataInterval, float smartValueThreshold, SensorCalculation* calculation) : Sensor (id, category, shortName, name, refreshInterval, postDataInterval, smartValueThreshold, calculation, false) {
 
   if(si1145==NULL)
     si1145 = new SI1145_WE();
 
-  si1145->init();
-
-  si1145->enableHighSignalVisRange(); // Gain divided by 14.5
-  si1145->enableHighSignalIrRange(); // Gain divided by 14.5
-  si1145->enableMeasurements(PSALSUV_TYPE, AUTO);
 }
 
 void SensorSI1145::preCycle(int cycleId)
@@ -43,7 +39,8 @@ void SensorSI1145::preCycle(int cycleId)
   {
     if(failedInit)
     {
-      Serial.println("Trying to re-init SI1145...");
+      if(lastCycleId!=-1)
+        Serial.println("Trying to re-init SI1145...");
       si1145->init();
       si1145->enableHighSignalVisRange(); // Gain divided by 14.5
       si1145->enableHighSignalIrRange(); // Gain divided by 14.5
