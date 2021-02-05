@@ -40,7 +40,7 @@ char firmwareType[] = "ESP8266";
 // char firmwareType[] = "ESP8266-1M";
 
 // String board = "NodeMCU";
-// char firmwareType[] = "ESP8266-NodeMCU-pp";
+// char firmwareType[] = "ESP8266-NodeMCU";
 
 // String board = "ESP12s";
 // char firmwareType[] = "ESP8266-ESP12s";
