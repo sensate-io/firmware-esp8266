@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v33 - Added Digital Sensor Switch Support
     v30 - Added Support for SSD1306 Displays
     v29 - First Public Release
@@ -19,6 +20,7 @@
 
 #include "SSD1306Wire.h" 
 #include "SH1106Wire.h"
+#include "../VisualisationHelper.h"
 
 #ifndef _DisplayOLED128_h_
 #define _DisplayOLED128_h_
@@ -127,10 +129,15 @@ class Display {
     void drawDisconnected(bool update);
     void drawConnected(bool update);
     void flip(int rotation);
+    void drawData(unsigned long currentMillis);
+    void clearValue(int position);
+    void drawValue(int position, String name, String shortName, String value, String unit);
     void drawValue(int position, String name, String shortName, float value, String unit);
     void drawValue(int position, String name, String shortName, bool value, String onString, String offString);
     void drawValueClassic(int position, String name, String shortName, String valueString);
     void drawValueQuad(int position, String name, String shortName, String valueString);
+    void clearValueClassic(int position);
+    void clearValueQuad(int position);
     int getType();
 };
 

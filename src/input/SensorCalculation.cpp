@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support
@@ -21,7 +22,7 @@
 
 #include "SensorCalculation.h"
 
-extern Display* display;
+extern VisualisationHelper* vHelper;
 
 SensorCalculation::SensorCalculation()
 {
@@ -211,8 +212,8 @@ Data* SensorCalculationApproxQuad::calculate(Sensor* sensor, float rawValue, boo
   double z = _calcValue1 + (_calcValue2 * v) + (_calcValue3 * v * v);
   float tempInC = (float) ((float) (1 / z) - 273.15);
 
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), tempInC, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, tempInC , _valueUnit);
   
   if(!postData)
     return NULL;
@@ -228,8 +229,9 @@ Data* SensorCalculationPT1001000::calculate(Sensor* sensor, float rT, bool postD
   double v5 = 2*_r0*b;
   float tempInC = (float)(-_r0*a+v4)/v5;
 
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), tempInC, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, tempInC , _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, tempInC, "CELSIUS");
@@ -242,8 +244,9 @@ Data* SensorCalculationDualNtc::calculate(Sensor* sensor, float rawValue, bool p
   double z = y / _calcValue1;
   float tempInC = (float) ((1.0 / (z + x))- 273.15);
 
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), tempInC, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, tempInC , _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, tempInC, "CELSIUS");
@@ -251,8 +254,9 @@ Data* SensorCalculationDualNtc::calculate(Sensor* sensor, float rawValue, bool p
 
 Data* SensorCalculationDirectKelvin::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "KELVIN");
@@ -260,8 +264,9 @@ Data* SensorCalculationDirectKelvin::calculate(Sensor* sensor, float rawValue, b
 
 Data* SensorCalculationDirectCelsius::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "CELSIUS");
@@ -269,8 +274,9 @@ Data* SensorCalculationDirectCelsius::calculate(Sensor* sensor, float rawValue, 
 
 Data* SensorCalculationDirectPercent::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "PERCENT");
@@ -278,8 +284,9 @@ Data* SensorCalculationDirectPercent::calculate(Sensor* sensor, float rawValue, 
 
 Data* SensorCalculationDirectHektoPascal::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "HEKTOPASCAL");
@@ -287,8 +294,9 @@ Data* SensorCalculationDirectHektoPascal::calculate(Sensor* sensor, float rawVal
 
 Data* SensorCalculationDirectMeter::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "METER");
@@ -296,8 +304,9 @@ Data* SensorCalculationDirectMeter::calculate(Sensor* sensor, float rawValue, bo
 
 Data* SensorCalculationDirectLux::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "LUX");
@@ -305,8 +314,9 @@ Data* SensorCalculationDirectLux::calculate(Sensor* sensor, float rawValue, bool
 
 Data* SensorCalculationDirectLumen::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "LUMEN");
@@ -314,8 +324,9 @@ Data* SensorCalculationDirectLumen::calculate(Sensor* sensor, float rawValue, bo
 
 Data* SensorCalculationDirectOhm::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "OHM");
@@ -323,8 +334,9 @@ Data* SensorCalculationDirectOhm::calculate(Sensor* sensor, float rawValue, bool
 
 Data* SensorCalculationDirectKOhm::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "KOHM");
@@ -332,8 +344,9 @@ Data* SensorCalculationDirectKOhm::calculate(Sensor* sensor, float rawValue, boo
 
 Data* SensorCalculationDirectPPM::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "PPM");
@@ -341,8 +354,9 @@ Data* SensorCalculationDirectPPM::calculate(Sensor* sensor, float rawValue, bool
 
 Data* SensorCalculationDirectWpm2::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "WPM2");
@@ -350,8 +364,9 @@ Data* SensorCalculationDirectWpm2::calculate(Sensor* sensor, float rawValue, boo
 
 Data* SensorCalculationDirectNone::calculate(Sensor* sensor, float rawValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "NONE");
@@ -361,8 +376,9 @@ Data* SensorCalculationCalcAltitude::calculate(Sensor* sensor, float rawValue, b
 {
   float altitude = 44330.0 * (1.0 - pow(rawValue / 1013.25, 0.1903));
   
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), altitude, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, altitude, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, altitude, "METER");
@@ -379,8 +395,9 @@ Data* SensorCalculationRawToPercent::calculate(Sensor* sensor, float rawValue, b
   if(percent<0) percent = 0.0;
   if(percent>100) percent = 100.0;
   
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), percent, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, percent, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, percent, "PERCENT");
@@ -394,8 +411,9 @@ Data* SensorCalculationRawToVoltage::calculate(Sensor* sensor, float rawValue, b
   float rawVoltage = rawValue / maxADCValue;
   float vResult = rawVoltage * refVoltage;
   
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), vResult, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, vResult, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, vResult, "VOLT");
@@ -403,8 +421,9 @@ Data* SensorCalculationRawToVoltage::calculate(Sensor* sensor, float rawValue, b
 
 Data* SensorCalculationRaw::calculate(Sensor* sensor, float rawValue, bool postData)
 {  
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), rawValue, _valueUnit);
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, rawValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, rawValue, "NONE");
@@ -412,8 +431,9 @@ Data* SensorCalculationRaw::calculate(Sensor* sensor, float rawValue, bool postD
 
 Data* SensorCalculationRaw::calculate(Sensor* sensor, bool boolValue, bool postData)
 {
-  if(display!=NULL && _portNumber>=0)
-    display->drawValue(_portNumber, sensor->getName(), sensor->getShortName(), boolValue, "ON", "OFF");
+  if(_portNumber>=0)
+    vHelper->getDisplayDataModel()->updateData(_portNumber, boolValue, _valueUnit);
+
   if(!postData)
     return NULL;
   return new Data (sensor, boolValue, "NONE");

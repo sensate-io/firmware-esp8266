@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v36 - Greatly improved reliability of connectivity
     v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v33 - Added Digital Sensor Switch Support
@@ -44,6 +45,7 @@
 #include "../input/onewire/SensorDHT.h"
 #include "../input/onewire/SensorDallas.h"
 #include "../output/display/DisplayOLED128.h"
+#include "../output/VisualisationHelper.h"
 
 bool initSSL();
 bool registerBridge();
@@ -52,10 +54,13 @@ void restart();
 
 bool getBridgeConfig();
 void configureBridge(JsonObject&);
+void initVisualisationHelper(JsonObject&);
+void configureDisplayValueData(int, JsonObject&);
 void configureExpansionPort(int, JsonObject&);
 void configurePort(int, JsonObject&);
 void addSensor(Sensor *);
 void loopSensor(int);
+void loopDisplay(unsigned long);
 boolean postSensorData(Data* data[], int);
 void checkStatus();
 void trySleep(long);

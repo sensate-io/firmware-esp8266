@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v35 - Added Support for VEML6075 and SI1145 UVI Sensors
     v34 - Added Generic Analog Sensor Support
     v33 - Added Digital Sensor Switch Support
@@ -26,7 +27,7 @@
 #define _SensorCalculation_h_
 
 #include "Sensor.h"
-#include "../output/display/DisplayOLED128.h"
+#include "../output/VisualisationHelper.h"
 
 class Data;
 class Sensor;

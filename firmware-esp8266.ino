@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v39 - ReAdded Support for VEML6075 and SI1145 UVI Sensors, added auto-reinit if sensor fails
     v38 - Changed automatic Update to only if required Update, removed VEML6075 and SI1145 UV Sensors
     v36 - Greatly improved reliability of connectivity
@@ -29,10 +30,12 @@
 #include "src/communication/WiFiManager.h"
 #include "src/controller/OTA.h"
 #include "src/communication/RestServer.h"
+#include "src/output/VisualisationHelper.h"
 
+VisualisationHelper* vHelper;
 Display* display = NULL;
 
-int currentVersion = 39; 
+int currentVersion = 40; 
 boolean printMemory = false;
 
 String board = "Generic";
@@ -95,6 +98,8 @@ void setup()
   Serial.println(getUUID());
 
   restoreBridgeConfig();
+
+  vHelper =  new VisualisationHelper();
 
   doPowerSavingInit(true);
 
@@ -173,6 +178,7 @@ void runTick() {
   switch(state)
   {
     case Operating:
+      loopDisplay(currentMillis);
       loopSensor(currentMillis);
       break;
   }

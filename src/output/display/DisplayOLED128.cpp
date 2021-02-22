@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v33 - Added Digital Sensor Switch Support
     v30 - Added Support for SSD1306 Displays
     v29 - First Public Release
@@ -20,6 +21,7 @@
 #include "DisplayOLED128.h"
 
 extern bool isResetting;
+extern VisualisationHelper* vHelper;
 
 int displayMode;
 boolean displayEnabled;
@@ -28,6 +30,7 @@ int displayHeight;
 int displayWidth;
 int displayRotation;
 bool firstSensorData;
+int visibleDataCount;
 
 Display::Display(bool flip, int _type, String address, uint8_t PortSDA, uint8_t PortSCL) {
 
@@ -36,9 +39,15 @@ Display::Display(bool flip, int _type, String address, uint8_t PortSDA, uint8_t 
     OLEDDISPLAY_GEOMETRY g;
     
     if(displayWidth==128 && displayHeight==32)
+    {
       g = GEOMETRY_128_32;
+      visibleDataCount = 2;
+    }
     else
+    {
       g = GEOMETRY_128_64;
+      visibleDataCount = 4;
+    }  
 
     firstSensorData=true;
 
@@ -169,6 +178,55 @@ void Display::drawConnected(bool update) {
     }
 }
 
+void Display::drawData(unsigned long currentMillis) {
+
+  for(int i=0;i<visibleDataCount;i++)
+  {
+    DisplayValueData* displayValueData = vHelper->getDataForPosition(currentMillis, i);
+    if(displayValueData!=NULL)
+      drawValue(i, displayValueData->getName(), displayValueData->getShortName(), displayValueData->getValue(), displayValueData->getUnit());
+    else
+      clearValue(i);
+  }
+
+}
+
+void Display::clearValue(int position) {
+
+  switch(displayMode)
+  {
+    case 1:
+      clearValueQuad(position);
+      break;
+    default:
+      clearValueClassic(position);
+      break;
+  }
+
+}
+
+void Display::drawValue(int position, String name, String shortName, String value, String unit) {
+
+  if(firstSensorData)
+  {
+    clear(true);
+    firstSensorData=false;
+  }
+
+  String valueString = value + " " + unit;
+
+  switch(displayMode)
+  {
+    case 1:
+      drawValueQuad(position, name, shortName, valueString);
+      break;
+    default:
+      drawValueClassic(position, name, shortName, valueString);
+      break;
+  }
+
+}
+
 void Display::drawValue(int position, String name, String shortName, float value, String unit) {
 
   if(firstSensorData)
@@ -282,6 +340,49 @@ void Display::drawValueQuad(int position, String name, String shortName, String 
     
     display->drawLine(0, h, 2*w-1, h);
     display->drawLine(w, 0, w, 2*h-1);
+
+    display->display();
+  }
+
+}
+
+void Display::clearValueClassic(int position) {
+
+  if(!isResetting && displayEnabled)
+  {
+    display->setColor(BLACK);
+    display->fillRect(0, position*16, 128, 16);
+  }
+  
+}
+
+void Display::clearValueQuad(int position) {
+
+  if(!isResetting && displayEnabled)
+  {
+    int rectX=0;
+    int rectY=0;
+    int w = 63;
+    int h = 31;
+
+    switch(position)
+    {
+      case 0:
+        break;
+      case 1:
+        rectX = w+2;
+        break;
+      case 2:
+        rectY = h+2;
+        break;
+      case 3:
+        rectX = w+2;
+        rectY = h+2;
+        break;
+    }
+
+    display->setColor(BLACK);
+    display->fillRect(rectX, rectY, w, h);
 
     display->display();
   }
