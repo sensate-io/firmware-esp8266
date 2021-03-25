@@ -17,6 +17,7 @@
 
 #include <ESP8266TrueRandom.h>
 #include <EEPROM.h>
+#include <WString.h>
 
 #ifndef _uuid_h_
 #define _uuid_h_

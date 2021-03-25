@@ -35,16 +35,16 @@ SensorBMx280::SensorBMx280 (long id, String category, String shortName, String n
   {
     if(bme77 == NULL)
     {
-      BME280I2C::Settings settings(
-        BME280::OSR_X1,
-        BME280::OSR_X1,
-        BME280::OSR_X1,
-        BME280::Mode_Forced,
-        BME280::StandbyTime_1000ms,
-        BME280::Filter_16,
-        BME280::SpiEnable_False,
-        0x77
-      );
+    	BME280I2C::Settings settings(
+			   BME280::OSR_X1,
+			   BME280::OSR_X1,
+			   BME280::OSR_X1,
+			   BME280::Mode_Forced,
+			   BME280::StandbyTime_1000ms,
+			   BME280::Filter_16,
+			   BME280::SpiEnable_False,
+			   BME280I2C::I2CAddr_0x77
+		  );
       bme77 = new BME280I2C(settings);
     }
     bme = bme77;

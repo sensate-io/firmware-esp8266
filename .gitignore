@@ -4,3 +4,9 @@
 /archive
 /src/input/.DS_Store
 /src/input/i2c/.DS_Store
+/sloeber.ino.cpp
+/Release/
+/.cproject
+/.project
+/.settings
+/spec.d
