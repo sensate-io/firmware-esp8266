@@ -3,14 +3,15 @@
     @file     Bridge.cpp
     @author   M. Fegerl (Sensate Digital Solutions GmbH)
     @license  GPL (see LICENSE file)
-    The Sensate ESP8266 firmware is used to connect ESP8266 based hardware 
-    with the Sensate Cloud and the Sensate apps.
+    The Sensatio ESP8266 firmware is used to connect ESP8266 based hardware
+    with the Sensatio Cloud and the Sensatio apps.
 
-    ----> https://www.sensate.io
+    ----> https://www.sensatio.io
 
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v41 - Renamed Display Class to support more types
     v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v36 - Greatly improved reliability of connectivity
     v35 - Added Support for VEML6075 and SI1145 UVI Sensors
@@ -504,11 +505,23 @@ void configureBridge(JsonObject& bridgeConfig) {
     displayEnabled = false;
   }
 
-  if(displayType!=0 && (oldSCL != i2cSCLPort || oldSDA != i2cSDAPort || oldDisplayWidth != displayWidth || oldDisplayHeight != displayHeight) || (display!=NULL && display->getType()!=displayType))
+  boolean requireInitI2C = true;
+
+  if((displayType==1 || displayType==2) && (oldSCL != i2cSCLPort || oldSDA != i2cSDAPort || oldDisplayWidth != displayWidth || oldDisplayHeight != displayHeight) || (display!=NULL && display->getType()!=displayType))
   {
-    Serial.println("CREATE TEMP DISPLAY for new I2C Bus!");
+    Serial.println("CREATE TEMP DISPLAY FOR NEW CONFIG");
     boolean rotateDisplay = (displayRotation == 180);
-    display = new Display(rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
+
+    switch(displayType)
+	{
+		case 3:
+			display = new DisplayST7735(rotateDisplay, displayType);
+			break;
+		default:	// Fallback to OLED init
+			display = new DisplayOLED128(displayWidth, displayHeight, rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
+			requireInitI2C=false;
+			break;
+	}
   }
   else
   {
@@ -520,18 +533,29 @@ void configureBridge(JsonObject& bridgeConfig) {
     {
       Serial.println("CREATE TEMP DISPLAY!");
       boolean rotateDisplay = (displayRotation == 180);
-      display = new Display(rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
+      switch(displayType)
+		{
+			case 3:
+				display = new DisplayST7735(rotateDisplay, displayType);
+				requireInitI2C=true;
+				break;
+			default:	// Fallback to OLED init
+				display = new DisplayOLED128(displayWidth, displayHeight, rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
+				requireInitI2C=false;
+				break;
+		}
     }
     else if(updateRotation && display!=NULL)
     {
       Serial.println("FLIP!");
       display->flip(displayRotation);
     }
-    else if(displayType==0)
-    {
-      Serial.println("Init I2C Bus: SDA-"+String(i2cSDAPort)+", SCL-"+String(i2cSCLPort));
-      Wire.begin(i2cSDAPort, i2cSCLPort);
-    }
+  }
+
+  if(requireInitI2C)
+  {
+	  Serial.println("Init I2C Bus: SDA-"+String(i2cSDAPort)+", SCL-"+String(i2cSCLPort));
+	  Wire.begin(i2cSDAPort, i2cSCLPort);
   }
 
   tryInitMQTT();
@@ -543,13 +567,6 @@ void configureBridge(JsonObject& bridgeConfig) {
 
 void initVisualisationHelper(JsonObject& bridgeConfig) {
 
-  int simultanValueCount;
-
-  if(displayHeight==64)
-    simultanValueCount = 4;
-  else if(displayHeight==32)
-    simultanValueCount = 2;
-
   unsigned long displayCycleInterval = bridgeConfig["di"];
   
   if(displayCycleInterval==0)
@@ -558,7 +575,7 @@ void initVisualisationHelper(JsonObject& bridgeConfig) {
   }
   else
   {
-    vHelper->enableDisplayCycle(millis(), simultanValueCount, displayCycleInterval);
+    vHelper->enableDisplayCycle(millis(), display->getSimultanValueCount(), displayCycleInterval);
   }
 
 }
@@ -1177,7 +1194,18 @@ boolean postSensorData(Data* data[], int dataCount)
         displayEnabled=true;
         boolean rotateDisplay = (displayRotation == 180);
         if(display==NULL)
-          display = new Display(rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
+        {
+        	switch(displayType)
+        	{
+        	case 3:
+        		display = new DisplayST7735(rotateDisplay, displayType);
+        		break;
+        	default:	// Fallback to OLED init
+        		display = new DisplayOLED128(displayWidth, displayHeight, rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
+        		break;
+        	}
+        }
+
         storeDisplayAndPowerConfig(false);
       }
       else if(payload.equals("dd") && displayEnabled==true)

@@ -79,3 +79,10 @@ DisplayValueData* VisualisationHelper::getDataForPosition(unsigned long currentM
 
     return NULL;
 }
+
+void VisualisationHelper::updateSimultanValueCount(int simultanValueCount)
+{
+	_simultanValueCount = simultanValueCount;
+	disableDisplayCycle();
+	enableDisplayCycle(_lastDisplayCycleUpdate, _simultanValueCount, _displayCycleInterval);
+}

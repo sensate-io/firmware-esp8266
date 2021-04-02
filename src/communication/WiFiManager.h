@@ -27,7 +27,7 @@
 #ifndef _WiFiManager_h_
 #define _WiFiManager_h_
 
-#include "../output/display/DisplayOLED128.h"
+#include "../output/display/Display.h"
 #include "../controller/StateHelper.h"
 #include "../controller/Bridge.h"
 

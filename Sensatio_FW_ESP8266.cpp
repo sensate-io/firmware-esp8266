@@ -11,7 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
-    v41 - Changed IDE, Sensatio
+    v41 - Changed IDE, Sensatio, Renamed Display Class to support more types
     v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v39 - ReAdded Support for VEML6075 and SI1145 UVI Sensors, added auto-reinit if sensor fails
     v38 - Changed automatic Update to only if required Update, removed VEML6075 and SI1145 UV Sensors
@@ -31,15 +31,15 @@
 VisualisationHelper* vHelper;
 Display* display = NULL;
 
-int currentVersion = 40;
+int currentVersion = 41;
 boolean printMemory = false;
 
-String board = "Generic";
-char firmwareType[] = "ESP8266";
+//String board = "Generic";
+//char firmwareType[] = "ESP8266";
 // char firmwareType[] = "ESP8266-1M";
 
-// String board = "NodeMCU";
-// char firmwareType[] = "ESP8266-NodeMCU";
+ String board = "NodeMCU";
+ char firmwareType[] = "ESP8266-NodeMCU";
 
 // String board = "ESP12s";
 // char firmwareType[] = "ESP8266-ESP12s";
@@ -69,11 +69,15 @@ unsigned long previousTickerMillis = 0;
 unsigned long currentMillis;
 State state = Boot;
 
+int displayMode;
+boolean displayEnabled;
+int displayType;
+int displayHeight;
+int displayWidth;
+int displayRotation;
+bool firstSensorData;
+
 extern struct rst_info resetInfo;
-extern int displayType;
-extern boolean displayEnabled;
-extern int displayRotation;
-extern int displayMode;
 
 extern uint8_t i2cSDAPort;
 extern uint8_t i2cSCLPort;
@@ -113,7 +117,15 @@ void setup()
   {
     boolean rotateDisplay = (displayRotation == 180);
 
-    display = new Display(rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
+    switch(displayType)
+    {
+		case 3:
+			display = new DisplayST7735(rotateDisplay, displayType);
+			break;
+		default:	// Fallback to OLED init
+			display = new DisplayOLED128(displayWidth, displayHeight, rotateDisplay, displayType,"",i2cSDAPort,i2cSCLPort);
+			break;
+    }
 
     if(!displayEnabled)
       display->clear(true);

@@ -24,8 +24,8 @@
 #include <EEPROM.h>
 #include <WiFiClientSecureBearSSL.h>
 
-#ifndef _Bridge_h_
-#define _Bridge_h_
+#ifndef _BRIDGE_H_
+#define _BRIDGE_H_
 
 #include "StateHelper.h"
 #include "UUID.h"
@@ -44,7 +44,9 @@
 #include "../input/i2c/SensorSI1145.h"
 #include "../input/onewire/SensorDHT.h"
 #include "../input/onewire/SensorDallas.h"
+#include "../output/display/Display.h"
 #include "../output/display/DisplayOLED128.h"
+#include "../output/display/DisplayST7735.h"
 #include "../output/VisualisationHelper.h"
 
 bool initSSL();

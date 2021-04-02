@@ -3,14 +3,15 @@
     @file     DisplayOLED128.cpp
     @author   M. Fegerl (Sensate Digital Solutions GmbH)
     @license  GPL (see LICENSE file)
-    The Sensate ESP8266 firmware is used to connect ESP8266 based hardware 
-    with the Sensate Cloud and the Sensate apps.
+    The Sensatio ESP8266 firmware is used to connect ESP8266 based hardware
+    with the Sensatio Cloud and the Sensatio apps.
 
-    ----> https://www.sensate.io
+    ----> https://www.sensatio.io
 
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v41 - Renamed Display Class to support more types, New Display Mode
     v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v33 - Added Digital Sensor Switch Support
     v30 - Added Support for SSD1306 Displays
@@ -23,21 +24,19 @@
 extern bool isResetting;
 extern VisualisationHelper* vHelper;
 
-int displayMode;
-boolean displayEnabled;
-int displayType;
-int displayHeight;
-int displayWidth;
-int displayRotation;
-bool firstSensorData;
-int visibleDataCount;
+extern int displayMode;
+extern boolean displayEnabled;
+extern bool firstSensorData;
 
-Display::Display(bool flip, int _type, String address, uint8_t PortSDA, uint8_t PortSCL) {
+DisplayOLED128::DisplayOLED128(int width, int height, bool flip, int _type, String address, uint8_t PortSDA, uint8_t PortSCL) : Display(_type) {
 
   if(!isResetting)
   {
     OLEDDISPLAY_GEOMETRY g;
     
+    displayWidth = width;
+    displayHeight = height;
+
     if(displayWidth==128 && displayHeight==32)
     {
       g = GEOMETRY_128_32;
@@ -51,8 +50,7 @@ Display::Display(bool flip, int _type, String address, uint8_t PortSDA, uint8_t 
 
     firstSensorData=true;
 
-    type = _type;
-    if(_type==2)
+    if(type==2)
       display = new SSD1306Wire(0x3c, PortSDA, PortSCL, g);
     else
       display = new SH1106Wire(0x3c, PortSDA, PortSCL, g);
@@ -66,7 +64,7 @@ Display::Display(bool flip, int _type, String address, uint8_t PortSDA, uint8_t 
   }
 }
 
-void Display::clear(boolean update) {
+void DisplayOLED128::clear(boolean update) {
   
   if(!isResetting)
   {
@@ -76,7 +74,7 @@ void Display::clear(boolean update) {
   }
 }
 
-void Display::flip(int rotation) {
+void DisplayOLED128::flip(int rotation) {
   display->resetDisplay();
   display->setContrast(255);
 
@@ -86,12 +84,7 @@ void Display::flip(int rotation) {
     display->resetOrientation();
 }
 
-int Display::getType()
-{
-  return type;
-}
-
-void Display::drawProductLogo() {
+void DisplayOLED128::drawProductLogo() {
   
     // see http://blog.squix.org/2015/05/esp8266-nodemcu-how-to-create-xbm.html
     // on how to create xbm files
@@ -104,7 +97,7 @@ void Display::drawProductLogo() {
     }
 }
 
-void Display::drawString(int16_t x, int16_t y, String text) {
+void DisplayOLED128::drawString(int16_t x, int16_t y, String text) {
 
   if(!isResetting && displayEnabled)
   {
@@ -117,7 +110,7 @@ void Display::drawString(int16_t x, int16_t y, String text) {
     
 }
 
-void Display::drawArrow() {
+void DisplayOLED128::drawArrow() {
   if(!isResetting && displayEnabled)
   {
    display->drawLine(0, 0, 30, display->getHeight()/2);
@@ -133,7 +126,7 @@ void Display::drawArrow() {
     
 }
 
-void Display::blinkArrow(int count) {
+void DisplayOLED128::blinkArrow(int count) {
 
   for(int i=0;i<count;i++)
   {
@@ -146,7 +139,7 @@ void Display::blinkArrow(int count) {
   clear(true);
 }
 
-void Display::drawDisconnected(bool update) {
+void DisplayOLED128::drawDisconnected(bool update) {
 
   if(!isResetting && displayEnabled)
   {
@@ -167,7 +160,7 @@ void Display::drawDisconnected(bool update) {
     }
 }
 
-void Display::drawConnected(bool update) {
+void DisplayOLED128::drawConnected(bool update) {
 
   if(!isResetting && displayEnabled)
   {
@@ -178,7 +171,7 @@ void Display::drawConnected(bool update) {
     }
 }
 
-void Display::drawData(unsigned long currentMillis) {
+void DisplayOLED128::drawData(unsigned long currentMillis) {
 
   for(int i=0;i<visibleDataCount;i++)
   {
@@ -191,7 +184,7 @@ void Display::drawData(unsigned long currentMillis) {
 
 }
 
-void Display::clearValue(int position) {
+void DisplayOLED128::clearValue(int position) {
 
   switch(displayMode)
   {
@@ -205,7 +198,7 @@ void Display::clearValue(int position) {
 
 }
 
-void Display::drawValue(int position, String name, String shortName, String value, String unit) {
+void DisplayOLED128::drawValue(int position, String name, String shortName, String value, String unit) {
 
   if(firstSensorData)
   {
@@ -220,6 +213,9 @@ void Display::drawValue(int position, String name, String shortName, String valu
     case 1:
       drawValueQuad(position, name, shortName, valueString);
       break;
+    case 2:
+    	drawValueClassicRA(position, name, shortName, valueString);
+    	break;
     default:
       drawValueClassic(position, name, shortName, valueString);
       break;
@@ -227,55 +223,55 @@ void Display::drawValue(int position, String name, String shortName, String valu
 
 }
 
-void Display::drawValue(int position, String name, String shortName, float value, String unit) {
+//void DisplayOLED128::drawValue(int position, String name, String shortName, float value, String unit) {
+//
+//  if(firstSensorData)
+//  {
+//    clear(true);
+//    firstSensorData=false;
+//  }
+//
+//  String valueString = String(value) + " " + unit;
+//
+//  switch(displayMode)
+//  {
+//    case 1:
+//      drawValueQuad(position, name, shortName, valueString);
+//      break;
+//    default:
+//      drawValueClassic(position, name, shortName, valueString);
+//      break;
+//  }
+//
+//}
+//
+//void DisplayOLED128::drawValue(int position, String name, String shortName, bool value, String onString, String offString) {
+//
+//  if(firstSensorData)
+//  {
+//    clear(true);
+//    firstSensorData=false;
+//  }
+//
+//  String boolString;
+//    if(value)
+//      boolString = onString;
+//    else
+//      boolString = offString;
+//
+//  switch(displayMode)
+//  {
+//    case 1:
+//      drawValueQuad(position, name, shortName, boolString);
+//      break;
+//    default:
+//      drawValueClassic(position, name, shortName, boolString);
+//      break;
+//  }
+//
+//}
 
-  if(firstSensorData)
-  {
-    clear(true);
-    firstSensorData=false;
-  }
-
-  String valueString = String(value) + " " + unit;
-
-  switch(displayMode)
-  {
-    case 1:
-      drawValueQuad(position, name, shortName, valueString);
-      break;
-    default:
-      drawValueClassic(position, name, shortName, valueString);
-      break;
-  }
-
-}
-
-void Display::drawValue(int position, String name, String shortName, bool value, String onString, String offString) {
-
-  if(firstSensorData)
-  {
-    clear(true);
-    firstSensorData=false;
-  }
-
-  String boolString;
-    if(value)
-      boolString = onString;
-    else
-      boolString = offString; 
-
-  switch(displayMode)
-  {
-    case 1:
-      drawValueQuad(position, name, shortName, boolString);
-      break;
-    default:
-      drawValueClassic(position, name, shortName, boolString);
-      break;
-  }
-
-}
-
-void Display::drawValueClassic(int position, String name, String shortName, String valueString) {
+void DisplayOLED128::drawValueClassic(int position, String name, String shortName, String valueString) {
 
   if(!isResetting && displayEnabled)
   {
@@ -292,7 +288,32 @@ void Display::drawValueClassic(int position, String name, String shortName, Stri
   
 }
 
-void Display::drawValueQuad(int position, String name, String shortName, String valueString) {
+void DisplayOLED128::drawValueClassicRA(int position, String name, String shortName, String valueString) {
+
+  if(!isResetting && displayEnabled)
+  {
+	display->setColor(BLACK);
+	display->fillRect(0, position*16, 128, 16);
+	display->setColor(WHITE);
+
+	int valueWidth = display->getStringWidth(valueString);
+	int valuePosition = displayWidth-valueWidth;
+
+	display->drawString(valuePosition, position*16, valueString);
+
+	String text = name+":";
+	if(display->getStringWidth(text)>=valuePosition)
+	{
+		text = shortName+":";
+	}
+
+    display->drawString(0, position*16, text);
+    display->display();
+  }
+
+}
+
+void DisplayOLED128::drawValueQuad(int position, String name, String shortName, String valueString) {
 
   if(!isResetting && displayEnabled)
   {
@@ -346,7 +367,7 @@ void Display::drawValueQuad(int position, String name, String shortName, String 
 
 }
 
-void Display::clearValueClassic(int position) {
+void DisplayOLED128::clearValueClassic(int position) {
 
   if(!isResetting && displayEnabled)
   {
@@ -356,7 +377,7 @@ void Display::clearValueClassic(int position) {
   
 }
 
-void Display::clearValueQuad(int position) {
+void DisplayOLED128::clearValueQuad(int position) {
 
   if(!isResetting && displayEnabled)
   {
@@ -387,4 +408,8 @@ void Display::clearValueQuad(int position) {
     display->display();
   }
 
+}
+
+int DisplayOLED128::getSimultanValueCount() {
+	return visibleDataCount;
 }

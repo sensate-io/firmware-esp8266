@@ -1,6 +1,6 @@
 /**************************************************************************/
 /*!
-    @file     DisplayOLED128.h
+    @file     DisplayST7735.h
     @author   M. Fegerl (Sensate Digital Solutions GmbH)
     @license  GPL (see LICENSE file)
     The Sensatio ESP8266 firmware is used to connect ESP8266 based hardware
@@ -11,44 +11,42 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
-    v41 - Renamed Display Class to support more types, New Display Mode
-    v40 - New Display Structure to enable Display Rotation, different Styles etc.
-    v33 - Added Digital Sensor Switch Support
-    v30 - Added Support for SSD1306 Displays
-    v29 - First Public Release
+    v41 - New Display Type ST7735, New Display Mode
 */
 /**************************************************************************/
 
-#ifndef _DisplayOLED128_h_
-#define _DisplayOLED128_h_
+#ifndef _DisplayST7735_h_
+#define _DisplayST7735_h_
 
 #include "Display.h"
-#include "SSD1306Wire.h" 
-#include "SH1106Wire.h"
+#include "Adafruit_ST7735.h"
+#include <WString.h>
 
-class DisplayOLED128 : public Display {
+class DisplayST7735 : public Display {
   private:
-    OLEDDisplay *display;
+	Adafruit_ST7735 *display;
     int type;
   public:
-    DisplayOLED128 (int, int, bool, int, String, uint8_t, uint8_t);
+    DisplayST7735 (bool, int);
     void drawProductLogo();
     void clear(boolean update);
-    void drawString(int16_t x, int16_t y, String text);
-    void drawArrow();
-    void blinkArrow(int count);
+//    void drawString(int16_t x, int16_t y, String text);
+//    void drawArrow();
+//    void blinkArrow(int count);
     void drawDisconnected(bool update);
     void drawConnected(bool update);
     void flip(int rotation);
     void drawData(unsigned long currentMillis);
-    void clearValue(int position);
+    void drawString(int16_t x, int16_t y, String text);
     void drawValue(int position, String name, String shortName, String value, String unit);
+    void clearValue(int position);
+    int getSimultanValueCount();
     void drawValueClassic(int position, String name, String shortName, String valueString);
     void drawValueClassicRA(int position, String name, String shortName, String valueString);
-    void drawValueQuad(int position, String name, String shortName, String valueString);
     void clearValueClassic(int position);
     void clearValueQuad(int position);
-    int getSimultanValueCount();
+    int getStringWidth(String text, int);
+    int getType();
 };
 
 #endif

@@ -3,14 +3,15 @@
     @file     OTA.cpp
     @author   M. Fegerl (Sensate Digital Solutions GmbH)
     @license  GPL (see LICENSE file)
-    The Sensate ESP8266 firmware is used to connect ESP8266 based hardware 
-    with the Sensate Cloud and the Sensate apps.
+    The Sensatio ESP8266 firmware is used to connect ESP8266 based hardware
+    with the Sensatio Cloud and the Sensatio apps.
 
-    ----> https://www.sensate.io
+    ----> https://www.sensatio.io
 
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v41 - Renamed Display Class to support more types
     v38 - Changed automatic Update to only if required Update
     v29 - First Public Release
 */
@@ -19,7 +20,7 @@
 #include "OTA.h"
 
 extern State state;
-extern Display* display;
+extern DisplayOLED128* display;
 extern bool isResetting;
 
 extern char firmwareType[];

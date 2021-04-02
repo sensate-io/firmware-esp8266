@@ -3,10 +3,10 @@
     @file     SensorBMx280.cpp
     @author   M. Fegerl (Sensate Digital Solutions GmbH)
     @license  GPL (see LICENSE file)
-    The Sensate ESP8266 firmware is used to connect ESP8266 based hardware 
-    with the Sensate Cloud and the Sensate apps.
+    The Sensatio ESP8266 firmware is used to connect ESP8266 based hardware
+    with the Sensatio Cloud and the Sensatio apps.
 
-    ----> https://www.sensate.io
+    ----> https://www.sensatio.io
 
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 

@@ -3,14 +3,15 @@
     @file     RestServer.cpp
     @author   M. Fegerl (Sensate Digital Solutions GmbH)
     @license  GPL (see LICENSE file)
-    The Sensate ESP8266 firmware is used to connect ESP8266 based hardware 
-    with the Sensate Cloud and the Sensate apps.
+    The Sensatio ESP8266 firmware is used to connect ESP8266 based hardware
+    with the Sensatio Cloud and the Sensatio apps.
 
-    ----> https://www.sensate.io
+    ----> https://www.sensatio.io
 
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v41 - Renamed Display Class to support more types
     v33 - Improved MQTT Setup Routine
     v32 - Added MQTT Support!
     v29 - First Public Release
@@ -26,7 +27,7 @@ extern IPAddress apIP;
 extern IPAddress netMsk;
 extern const byte DNS_PORT;
 extern const char *myHostname;
-extern Display* display;
+extern DisplayOLED128* display;
 extern String bridgeURL;
 extern MQTT* mqtt;
 extern boolean enableMQTT;
@@ -343,9 +344,9 @@ void returnNetworkList() {
   for (int i = 0; i < numberOfNetworks; i++) {
 
     JsonObject& network = jsonBuffer.createObject();
-    network["name"] = WiFi.SSID(i);
+    network["name"] = WiFi.SSID(i); // @suppress("Invalid arguments")
     network["enc"] =  (WiFi.encryptionType(i) == ENC_TYPE_NONE) ? false : true;
-    network["rssi"] = WiFi.RSSI(i);
+    network["rssi"] = WiFi.RSSI(i); // @suppress("Invalid arguments")
     
     root.add(network);
   }
@@ -369,7 +370,7 @@ void presentWiFiSetupScreen() {
 
   for (int i = 0; i < numberOfNetworks; i++) {
 
-    networks[i] = WiFi.SSID(i) + " (" + WiFi.RSSI(i) + "ddBm)";
+    networks[i] = WiFi.SSID(i) + " (" + WiFi.RSSI(i) + "ddBm)"; // @suppress("Invalid arguments")
 //    Serial.println("Network: " + networks[i]);
 
   }
@@ -377,7 +378,7 @@ void presentWiFiSetupScreen() {
   restoreBridgeConfig();
   String wifiResponse = "<html><body style='width:600;margin-left:auto;margin-right:auto;font-family:verdana'><br/><br/><h1>Welcome to your Sensate Bridge</h1><br/><br/><form action='/manualsetup' method='post'><table width='100%'><tr><td colspan='2'><h2>Wireless LAN Configuration</h2></td></tr><tr><td align='right'><b>SSID/Name</b></td><td><select name='ssid'>";
   for (int i = 0; i < numberOfNetworks; i++) {
-    wifiResponse = wifiResponse + "<option value='" + WiFi.SSID(i) + "'>" + WiFi.SSID(i) + " (" + WiFi.RSSI(i) + "ddBm)</option>";
+    wifiResponse = wifiResponse + "<option value='" + WiFi.SSID(i) + "'>" + WiFi.SSID(i) + " (" + WiFi.RSSI(i) + "ddBm)</option>"; // @suppress("Invalid arguments")
   }
 
   wifiResponse = wifiResponse + "</select></td></tr><tr><td align='right'><b>Password</b></td><td><input type='password' name='password' value='' maxlength='63' placeholder='leave empty if unencrypted' size='30'/></td></tr><tr><td colspan='2'>&nbsp;</td></tr><tr><td colspan='2'><h2>Service Configuration</h2></td></tr><tr><td align='right'><b>SensorHub Location</b></td><td><input type='text' name='url' value='https://hub.sensate.cloud' maxlength='100' placeholder='Service Backend URL' size='40'/></td></tr><tr><td align='right'><b>Device Name</b></td><td><input type='text' name='identifier' value='Bridge' maxlength='100' placeholder='Bridge Name' size='40'/></td></tr><tr><td colspan='2'>&nbsp;</td></tr><tr><td colspan='2'>&nbsp;</td></tr><tr><td colspan='2' align='center'><input type='submit' value='Save and restart' style='height: 25px; width: 100px;'/></td></tr></table></form></body></html>";
