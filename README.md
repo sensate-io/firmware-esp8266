@@ -1,9 +1,9 @@
 # firmware-esp8266
 
-The Sensate ESP8266 firmware is used to connect ESP8266 based hardware with the Sensate Cloud and the Sensate apps.
-Find out more at https://www.sensate.io
+The Sensatio ESP8266 firmware is used to connect ESP8266 based hardware with the Sensatio Cloud and the Sensatio apps.
+Find out more at https://www.sensatio.io
 
-# The Sensate Firmware for ESP8266 currently uses the following Libraries:
+# The Sensatio Firmware for ESP8266 currently uses the following Libraries:
 
 - Arduino IDE ESP8266 Base Library (https://github.com/esp8266/Arduino v2.7.4)
 - ArduinoJson (https://github.com/bblanchon/ArduinoJson v5.13.5)
@@ -27,7 +27,7 @@ Windows, Linux and Mac Users:
 Use pyflasher from https://github.com/marcelstoer/nodemcu-pyflasher/releases for flashing the firmware.
 
 Find more informations here:
-https://www.sensate.io
+https://www.sensatio.io
 
 And here in German:
-https://www.sensate.io/de
+https://www.sensatio.io/de
