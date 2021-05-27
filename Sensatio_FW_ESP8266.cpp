@@ -32,8 +32,8 @@
 VisualisationHelper* vHelper;
 Display* display = NULL;
 
-const int currentVersion = 42;
-const boolean printMemory = false;
+int currentVersion = 42;
+boolean printMemory = false;
 
 //String board = "Generic";
 //char firmwareType[] = "ESP8266";
