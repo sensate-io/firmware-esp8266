@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v42 - Fixed low memory issues in configurations with many sensors and a ST7735 Bug
     v41 - Changed IDE, Sensatio, Renamed Display Class to support more types
     v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v39 - ReAdded Support for VEML6075 and SI1145 UVI Sensors, added auto-reinit if sensor fails
@@ -31,8 +32,8 @@
 VisualisationHelper* vHelper;
 Display* display = NULL;
 
-int currentVersion = 41;
-boolean printMemory = false;
+const int currentVersion = 42;
+const boolean printMemory = false;
 
 //String board = "Generic";
 //char firmwareType[] = "ESP8266";

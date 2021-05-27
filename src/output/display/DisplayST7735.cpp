@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v42 - Fixed Umlaut Handling
     v41 - New Display Type ST7735, New Display Mode
 */
 /**************************************************************************/
@@ -76,9 +77,9 @@ void DisplayST7735::drawData(unsigned long currentMillis) {
 	  {
 	    DisplayValueData* displayValueData = vHelper->getDataForPosition(currentMillis, i);
 	    if(displayValueData!=NULL)
-	      drawValue(i, displayValueData->getName(), displayValueData->getShortName(), displayValueData->getValue(), displayValueData->getUnit());
+	    	drawValue(i, displayValueData->getName(), displayValueData->getShortName(), displayValueData->getValue(), displayValueData->getUnit());
 	    else
-	      clearValue(i);
+	    	clearValue(i);
 	  }
 
 }
@@ -96,11 +97,11 @@ void DisplayST7735::drawValue(int position, String name, String shortName, Strin
   switch(displayMode)
   {
   	  case 2:
-  		drawValueClassicRA(position, name, shortName, valueString);
-  		break;
+		drawValueClassicRA(position, name, shortName, valueString);
+		break;
   	  default:
-  		  drawValueClassic(position, name, shortName, valueString);
-  		  break;
+		drawValueClassic(position, name, shortName, valueString);
+		break;
   }
 
 }
@@ -109,31 +110,19 @@ void DisplayST7735::drawValueClassic(int position, String name, String shortName
 
   if(!isResetting && displayEnabled)
   {
-	name.replace("ä", "ae");
-	name.replace("ü", "ue");
-	name.replace("ö", "oe");
-	name.replace("ß", "sz");
-	name.replace("Ä", "Ae");
-	name.replace("Ü", "Ue");
-	name.replace("Ö", "Oe");
 
-    String text = name+": "+valueString;
-    if(getStringWidth(text,8)>=displayWidth)
-    {
-    	shortName.replace("ä", "ae");
-    	shortName.replace("ü", "ue");
-    	shortName.replace("ö", "oe");
-    	shortName.replace("ß", "sz");
-    	shortName.replace("Ä", "Ae");
-    	shortName.replace("Ü", "Ue");
-    	shortName.replace("Ö", "Oe");
-    	text = shortName+": "+valueString;
-    }
+	valueString.replace("°",String((char)0xF7));
+
+	String text = replaceUmlauts(name)+": "+valueString;
+
+	if(getStringWidth(text,8)>=displayWidth)
+	{
+		text = replaceUmlauts(shortName)+": "+valueString;
+	}
 
     display->setCursor(0, position*16); // @suppress("Method cannot be resolved")
 	display->setTextColor(ST7735_WHITE, ST7735_BLACK); // @suppress("Method cannot be resolved")
 	display->print(text); // @suppress("Method cannot be resolved")
-
 
 	int diffWidth = displayWidth - getStringWidth(text,8);
 	if(diffWidth>0)
@@ -149,7 +138,10 @@ void DisplayST7735::drawValueClassicRA(int position, String name, String shortNa
 
   if(!isResetting && displayEnabled)
   {
+
 	display->setTextColor(ST7735_WHITE, ST7735_BLACK); // @suppress("Method cannot be resolved")
+
+	valueString.replace("°",String((char)0xF7));
 
 	int valueWidth = getStringWidth(valueString,8);
 	int valuePosition = displayWidth-valueWidth;
@@ -157,26 +149,11 @@ void DisplayST7735::drawValueClassicRA(int position, String name, String shortNa
 	display->setCursor(valuePosition, position*16); // @suppress("Method cannot be resolved")
 	display->print(valueString); // @suppress("Method cannot be resolved")
 
-	name.replace("ä", "ae");
-	name.replace("ü", "ue");
-	name.replace("ö", "oe");
-	name.replace("ß", "sz");
-	name.replace("Ä", "Ae");
-	name.replace("Ü", "Ue");
-	name.replace("Ö", "Oe");
-
-    String text = name+":";
-    if(getStringWidth(text,8)>=valuePosition)
-    {
-    	shortName.replace("ä", "ae");
-    	shortName.replace("ü", "ue");
-    	shortName.replace("ö", "oe");
-    	shortName.replace("ß", "sz");
-    	shortName.replace("Ä", "Ae");
-    	shortName.replace("Ü", "Ue");
-    	shortName.replace("Ö", "Oe");
-    	text = shortName+":";
-    }
+	String text = replaceUmlauts(name)+":";
+	if(getStringWidth(text,8)>=valuePosition)
+	{
+		text = replaceUmlauts(shortName)+":";
+	}
 
     display->setCursor(0, position*16); // @suppress("Method cannot be resolved")
 	display->print(text); // @suppress("Method cannot be resolved")
@@ -256,4 +233,17 @@ int DisplayST7735::getStringWidth(String text, int textHeight) {
 
 	return w;
 
+}
+
+String DisplayST7735::replaceUmlauts(String original)
+{
+	original.replace("ä", String((char)0x84));
+	original.replace("ü", String((char)0x81));
+	original.replace("ö", String((char)0x94));
+	original.replace("ß", String((char)0xE0));
+	original.replace("Ä", String((char)0x8E));
+	original.replace("Ü", String((char)0x9A));
+	original.replace("Ö", String((char)0x99));
+
+	return original;
 }

@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v42 - Fixed low memory issues in configurations with many sensors and a ST7735 Bug
     v41 - Renamed Display Class to support more types
     v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v36 - Greatly improved reliability of connectivity
@@ -44,6 +45,7 @@ extern int displayMode;
 extern int displayHeight;
 extern int displayWidth;
 extern int displayRotation;
+extern boolean printMemory;
 
 extern struct rst_info resetInfo;
 
@@ -79,6 +81,9 @@ int postSensorDataRetry = 0;
 int sensorCycle = 1;
 
 extern VisualisationHelper* vHelper;
+
+int portNumber = 0;
+bool foundPorts = false;
 
 std::unique_ptr<BearSSL::WiFiClientSecure>sslClient(new BearSSL::WiFiClientSecure);
 
@@ -360,10 +365,11 @@ bool getBridgeConfig() {
   {
     Serial.print("o");
     String payload = httpClient.getString();
+    httpClient.end();
 
-    int portNumber = 0;
+    portNumber = 0;
+    foundPorts = false;
 
-    bool foundPorts = false;
     configRetry=0;
 
     if (payload != NULL && payload != "")
@@ -387,45 +393,66 @@ bool getBridgeConfig() {
           }
         }
       }
+
+      configureBridge(bridgeConfig);
+	  yield();
+
       if(bridgeConfig.containsKey("p"))
       {
-        configureBridge(bridgeConfig);
+        JsonArray& portConfigArray = bridgeConfig["p"];
+        handlePortConfigArray(portConfigArray);
         yield();
 
-        JsonArray& configArray = bridgeConfig["p"];
-
-        for (JsonObject& configEntry : configArray) {
-          
-          int portRow = portNumber;
-
-          if (configEntry.containsKey("sod") && !configEntry["sod"])
-          {
-              portRow = -1;
-          }
-          else
-          {
-            portNumber++;
-            configureDisplayValueData(portRow, configEntry);
-          }
-      
-          if (configEntry.containsKey("et"))
-            configureExpansionPort(portRow, configEntry);
-          else
-            configurePort(portRow, configEntry);
-
-          foundPorts = true;
-          yield();
-        }
-
-        if(display!=NULL)
-        {
-          display->clear(false);
-          display->drawProductLogo();
-          display->drawString(0, 10, "Waiting for sensors...");
-          initVisualisationHelper(bridgeConfig);
-        }
-
       }
+      if(bridgeConfig.containsKey("ppc"))
+      {
+    	  int portPageCount = bridgeConfig["ppc"];
+    	  Serial.println("Config contains "+String(portPageCount)+ " port pages");
+
+    	  for(int i=1;i<portPageCount;i++)
+    	  {
+    		  Serial.println("Fetching port page "+String(i));
+
+    		  String pageUrlString = bridgeURL + "/" + apiVersion + "/bridge/" + getUUID() + "/" + String(i);
+    		  httpClient.begin(*sslClient, pageUrlString);
+
+    		  httpClient.addHeader("Content-Type", "application/json");
+
+			  Serial.print("g");
+			  int pageHttpCode = httpClient.GET();
+
+    		  if (pageHttpCode == HTTP_CODE_OK)
+    		  {
+    			  Serial.print("o");
+
+    			  String pagePayload = httpClient.getString();
+    			  httpClient.end();
+
+				  if (pagePayload != NULL && pagePayload != "")
+				  {
+					JsonObject& bridgePortConfig = jsonBuffer.parseObject(pagePayload);
+					if(bridgePortConfig.containsKey("p"))
+					{
+						JsonArray& pagedPortConfigArray = bridgePortConfig["p"];
+						handlePortConfigArray(pagedPortConfigArray);
+					}
+
+				  }
+    		  }
+    		  else
+    			  httpClient.end();
+
+    		  yield();
+    	  }
+      }
+
+      if(display!=NULL)
+	  {
+		display->clear(false);
+		display->drawProductLogo();
+		display->drawString(0, 10, "Waiting for sensors...");
+		initVisualisationHelper(bridgeConfig);
+	  }
 
       jsonBuffer.clear();
 
@@ -458,6 +485,39 @@ bool getBridgeConfig() {
 
     
   return false;
+
+}
+
+void handlePortConfigArray(JsonArray& portConfigArray) {
+
+	for (JsonObject& configEntry : portConfigArray) {
+
+		int portRow = portNumber;
+
+		if (configEntry.containsKey("sod") && !configEntry["sod"])
+		{
+			portRow = -1;
+		}
+		else
+		{
+			portNumber++;
+			configureDisplayValueData(portRow, configEntry);
+		}
+
+		if (configEntry.containsKey("et"))
+			configureExpansionPort(portRow, configEntry);
+		else
+			configurePort(portRow, configEntry);
+
+		foundPorts = true;
+		yield();
+	}
+
+	if(printMemory)
+	{
+		Serial.print("HEAP: ");
+		Serial.println(ESP.getFreeHeap());
+	}
 
 }
 
@@ -552,7 +612,7 @@ void configureBridge(JsonObject& bridgeConfig) {
     }
   }
 
-  if(requireInitI2C)
+  if(requireInitI2C && (i2cSCLPort != i2cSDAPort))
   {
 	  Serial.println("Init I2C Bus: SDA-"+String(i2cSDAPort)+", SCL-"+String(i2cSCLPort));
 	  Wire.begin(i2cSDAPort, i2cSCLPort);

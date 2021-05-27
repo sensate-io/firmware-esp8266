@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v42 - Fixed Umlaut Handling
     v41 - New Display Type ST7735, New Display Mode
 */
 /**************************************************************************/
@@ -26,6 +27,7 @@ class DisplayST7735 : public Display {
   private:
 	Adafruit_ST7735 *display;
     int type;
+    String replaceUmlauts(String original);
   public:
     DisplayST7735 (bool, int);
     void drawProductLogo();
