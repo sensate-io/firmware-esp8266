@@ -36,7 +36,6 @@ extern bool isResetting;
 extern StaticJsonBuffer<10000> jsonBuffer;
 extern String apiVersion;
 extern int currentVersion;
-extern char firmwareType[];
 
 extern int powerMode;
 extern Display* display;
@@ -47,8 +46,6 @@ extern int displayHeight;
 extern int displayWidth;
 extern int displayRotation;
 extern boolean printMemory;
-
-extern struct rst_info resetInfo;
 
 extern String name;
 extern String board;
@@ -86,27 +83,36 @@ extern VisualisationHelper* vHelper;
 int portNumber = 0;
 bool foundPorts = false;
 
+String urlString;
+String requestDataString;
+String message;
+String payload;
+
 std::unique_ptr<BearSSL::WiFiClientSecure>sslClient(new BearSSL::WiFiClientSecure);
 
-bool initSSL()
+HTTPClient httpClient;
+
+void initSSL()
 {
   sslClient->setBufferSizes(512, 512);
-
   if(bridgeURL.startsWith("https://hub"))
     sslClient->setFingerprint(ssl_fingerprint_prod);
   else if(bridgeURL.startsWith("https://test"))
     sslClient->setFingerprint(ssl_fingerprint_test);
 }
 
-bool registerBridge()
+void registerBridge()
 {
+//  urlString.reserve(300);
+//  requestDataString.reserve(200);
+//  payload.reserve(1000);
+
   if(display!=NULL)
   {
     display->clear(false);
     display->drawProductLogo();
     display->drawString(0, 10, "Signing in...");
   }
-    
   String uuid = getUUID();
   String networkIP = WiFi.localIP().toString();
 
@@ -115,14 +121,11 @@ bool registerBridge()
     Serial.println("Registering Bridge " + uuid + " to Bridge located at " + bridgeURL);
     if (WiFi.status() == WL_CONNECTED) {
 
-      HTTPClient httpClient;
-
-      String urlString = bridgeURL + "/" + apiVersion + "/bridge/";
+      urlString = bridgeURL + "/" + apiVersion + "/bridge/";
 
       httpClient.begin(*sslClient, urlString);
       httpClient.addHeader("Content-Type", "application/json");
       httpClient.setTimeout(5000);
-
       String pwdHashString = "";
 
       if(pwdHash[0]!=0xff)
@@ -131,20 +134,20 @@ bool registerBridge()
       }
       
       String message = "{\"uuid\":\"" + uuid + "\",\"networkIP\":\"" + networkIP + "\",\"name\":\"" + name + "\",\"vendor\":\"" + board + "\",\"type\":\"" + ucType + "\",\"firmwareVersion\":" + currentVersion + ",\"secPassword\":\"" + pwdHashString + "\"}";
-
       Serial.print("p");
       int httpCode = httpClient.POST(message);
 
       if (httpCode == HTTP_CODE_OK)
       {
         Serial.print("o");
-        String payload = httpClient.getString();
+        payload = httpClient.getString();
+
         if (payload == uuid)
         {
           registerRetry=0;
           state = Init_Configuration;
           httpClient.end();
-          return true;
+          return;
         }          
       }
       else if (httpCode == HTTP_CODE_UPGRADE_REQUIRED)
@@ -152,7 +155,7 @@ bool registerBridge()
         Serial.print("u");
         httpClient.end();
         restart();
-        return false;
+        return;
       }
       else
       {
@@ -168,20 +171,20 @@ bool registerBridge()
             httpClient.end();
             Serial.println("Registering not possible, going back to Deep Sleep for 5 minutes.");
             trySleep(300000000);
-            return false;
+            return;
           }
           else if (registerRetry>=25)
           {
             httpClient.end();
             restart();
-            return false;
+            return;
           }
           
         }
       }
       
       httpClient.end();
-      return false;
+      return;
 
     }
     else
@@ -190,14 +193,14 @@ bool registerBridge()
       Serial.println("Register failed..? - WIFI:" + WiFi.status());
       Serial.println("Trying to reconnect... " + WiFi.status());
       WiFi.reconnect();
-      int conRes = WiFi.waitForConnectResult();
+      WiFi.waitForConnectResult();
     }
     
   }
   else
   {
     Serial.println("Failed to register Bridge");
-    return false;
+    return;
   }
 
 }
@@ -340,11 +343,9 @@ void restart() {
     wdt_reset();
 }
 
-bool getBridgeConfig() {
+void getBridgeConfig() {
 
   Serial.println("Getting Bridge Config from " + bridgeURL);
-
-  HTTPClient httpClient;
 
   if(display!=NULL)
   {
@@ -353,7 +354,7 @@ bool getBridgeConfig() {
     display->drawString(0, 10, "Waiting for config...");
   }
 
-  String urlString = bridgeURL + "/" + apiVersion + "/bridge/" + getUUID();
+  urlString = bridgeURL + "/" + apiVersion + "/bridge/" + getUUID();
 
   httpClient.begin(*sslClient, urlString);
 
@@ -365,7 +366,7 @@ bool getBridgeConfig() {
   if (httpCode == HTTP_CODE_OK)
   {
     Serial.print("o");
-    String payload = httpClient.getString();
+    payload = httpClient.getString();
     httpClient.end();
 
     portNumber = 0;
@@ -414,8 +415,8 @@ bool getBridgeConfig() {
     	  {
     		  Serial.println("Fetching port page "+String(i));
 
-    		  String pageUrlString = bridgeURL + "/" + apiVersion + "/bridge/" + getUUID() + "/" + String(i);
-    		  httpClient.begin(*sslClient, pageUrlString);
+    		  urlString = bridgeURL + "/" + apiVersion + "/bridge/" + getUUID() + "/" + String(i);
+    		  httpClient.begin(*sslClient, urlString);
 
     		  httpClient.addHeader("Content-Type", "application/json");
 
@@ -426,12 +427,12 @@ bool getBridgeConfig() {
     		  {
     			  Serial.print("o");
 
-    			  String pagePayload = httpClient.getString();
+    			  payload = httpClient.getString();
     			  httpClient.end();
 
-				  if (pagePayload != NULL && pagePayload != "")
+				  if (payload != NULL && payload != "")
 				  {
-					JsonObject& bridgePortConfig = jsonBuffer.parseObject(pagePayload);
+					JsonObject& bridgePortConfig = jsonBuffer.parseObject(payload);
 					if(bridgePortConfig.containsKey("p"))
 					{
 						JsonArray& pagedPortConfigArray = bridgePortConfig["p"];
@@ -462,7 +463,7 @@ bool getBridgeConfig() {
       if(foundPorts)
         state = Operating;
 
-      return true;
+      return;
     }
   }
 
@@ -485,7 +486,7 @@ bool getBridgeConfig() {
   }
 
     
-  return false;
+  return;
 
 }
 
@@ -757,10 +758,9 @@ void configureDisplayValueData(int portNumber, JsonObject& portConfig) {
 }
 
 void configureExpansionPort(int portNumber, JsonObject& portConfig) {
-  Serial.println("Configure Expansion Port: ");
+  Serial.print("Configure Expansion Port: ");
 
-  portConfig.prettyPrintTo(Serial);
-  Serial.println("");
+  //portConfig.prettyPrintTo(Serial);
   
   SensorCalculation* calc = NULL;
 
@@ -845,7 +845,7 @@ void configureExpansionPort(int portNumber, JsonObject& portConfig) {
   else if (portConfig["et"] == "DHT11" || portConfig["et"] == "DHT21" || portConfig["et"] == "DHT22")
   {
     uint8_t port = translateGPIOPort(portConfig["ec1"]);
-    if(port>=0)
+    if(port<999)
     {
       addSensor(new SensorDHT(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["et"], port, refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
     }
@@ -883,7 +883,7 @@ void configurePort(int portNumber, JsonObject& portConfig) {
   
   Serial.println("Configure Onboard Port:" + port);
 
-  portConfig.prettyPrintTo(Serial);
+  //portConfig.prettyPrintTo(Serial);
   Serial.println("");
 
   SensorCalculation* calc = NULL;
@@ -967,7 +967,7 @@ void configurePort(int portNumber, JsonObject& portConfig) {
   else
   {
     uint8_t intPort = translateGPIOPort(port);
-    if(intPort!=-1)
+    if(intPort<999)
     {
       Serial.println("Setting up Digital Switch at Port: " + port);
       addSensor(new SensorDigitalSwitch(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], intPort, refreshInterval, postDataInterval, calc));
@@ -1200,7 +1200,7 @@ uint8_t translateGPIOPort(String gpioPort)
   if(gpioPort=="16")
     return 16;  
   
-  return -1;
+  return 999;
 }
 
 boolean postSensorData(Data* data[], int dataCount)
@@ -1267,9 +1267,7 @@ boolean postSensorData(Data* data[], int dataCount)
 
 boolean postSensorDataPart(Data* data[], int startIndex, int endIndex)
 {
-  HTTPClient httpClient;
-
-  String requestDataString = "";
+  requestDataString = "";
 
   for (int i = startIndex; i <= endIndex; i++)
   {
@@ -1279,7 +1277,7 @@ boolean postSensorDataPart(Data* data[], int startIndex, int endIndex)
       requestDataString = requestDataString + "," + data[i]->getRequestString();
   }
 
-  String urlString = bridgeURL + "/" + apiVersion + "/data/" + getUUID() + "/" + requestDataString;
+  urlString = bridgeURL + "/" + apiVersion + "/data/" + getUUID() + "/" + requestDataString;
 
   httpClient.begin(*sslClient, urlString);
 
@@ -1307,7 +1305,7 @@ boolean postSensorDataPart(Data* data[], int startIndex, int endIndex)
         display->drawConnected(true);
     }
 
-    String payload = httpClient.getString();
+    payload = httpClient.getString();
     httpClient.end();
 
     if(payload!=NULL && displayType!=0)

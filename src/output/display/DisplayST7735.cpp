@@ -222,7 +222,7 @@ void DisplayST7735::drawConnected(bool update) {
 
   if(!isResetting && displayEnabled)
   {
-	  display->fillRect(112, 48, 16, 16, ST7735_BLACK);
+	  display->fillRect(144, 112, 16, 16, ST7735_BLACK);
   }
 }
 

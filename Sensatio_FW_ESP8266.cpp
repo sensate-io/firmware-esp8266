@@ -52,11 +52,10 @@ boolean printMemory = false;
 // String board = "D1Mini";
 // char firmwareType[] = "ESP8266-D1Mini";
 
-extern String name = "Bridge";
-extern String ucType = "ESP8266";
+String name = "Bridge";
+String ucType = "ESP8266";
 
 String variant = "SensatioV"+String(currentVersion)+board;
-
 String apiVersion = "v1";
 
 int powerMode;

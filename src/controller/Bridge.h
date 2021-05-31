@@ -51,12 +51,12 @@
 #include "../output/display/DisplayST7735.h"
 #include "../output/VisualisationHelper.h"
 
-bool initSSL();
-bool registerBridge();
+void initSSL();
+void registerBridge();
 void restoreBridgeConfig();
 void restart();
 
-bool getBridgeConfig();
+void getBridgeConfig();
 void configureBridge(JsonObject&);
 void initVisualisationHelper(JsonObject&);
 void configureDisplayValueData(int, JsonObject&);

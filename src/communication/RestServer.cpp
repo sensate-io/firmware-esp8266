@@ -334,8 +334,6 @@ void returnNetworkList() {
 
   int numberOfNetworks = WiFi.scanNetworks();
 
-  String networks[numberOfNetworks];
-
   String wifiResponse = "[";
 
   StaticJsonBuffer<1000> jsonBuffer;
