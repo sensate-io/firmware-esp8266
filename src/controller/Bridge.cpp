@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v43 - Fixed data transmit issues in configurations with many sensors
     v42 - Fixed low memory issues in configurations with many sensors and a ST7735 Bug
     v41 - Renamed Display Class to support more types
     v40 - New Display Structure to enable Display Rotation, different Styles etc.
@@ -1204,13 +1205,75 @@ uint8_t translateGPIOPort(String gpioPort)
 
 boolean postSensorData(Data* data[], int dataCount)
 {
+	if(printMemory)
+	{
+		Serial.print("HEAP: ");
+		Serial.println(ESP.getFreeHeap());
+	}
+
+	boolean success = true;
+
+	if(dataCount<=5)
+	{
+		success = postSensorDataPart(data, 0, dataCount-1);
+	}
+	else
+	{
+		Serial.print("s");
+		Serial.print(dataCount);
+
+		int start = 0;
+		int end = 4;
+
+		while(end<=dataCount)
+		{
+			if(!postSensorDataPart(data, start, end))
+				success = false;
+
+			yield();
+
+			if(printMemory)
+			{
+				Serial.print("HEAP: ");
+				Serial.println(ESP.getFreeHeap());
+			}
+
+			start+=5;
+			end+=5;
+
+			if(start>dataCount-1)
+				break;
+			if(end>dataCount-1)
+				end = dataCount-1;
+		}
+	}
+
+	if(!success)
+	{
+		postSensorDataRetry++;
+
+		if(postSensorDataRetry>=25)
+		{
+		  postSensorDataRetry=0;
+		  restart();
+		}
+
+		Serial.println("Retry #"+String(postSensorDataRetry)+", restart at 25");
+	}
+
+	return success;
+}
+
+
+boolean postSensorDataPart(Data* data[], int startIndex, int endIndex)
+{
   HTTPClient httpClient;
 
   String requestDataString = "";
 
-  for (int i = 0; i < dataCount; i++)
+  for (int i = startIndex; i <= endIndex; i++)
   {
-    if (i == 0)
+    if (i == startIndex)
       requestDataString = data[i]->getRequestString();
     else
       requestDataString = requestDataString + "," + data[i]->getRequestString();
@@ -1245,6 +1308,7 @@ boolean postSensorData(Data* data[], int dataCount)
     }
 
     String payload = httpClient.getString();
+    httpClient.end();
 
     if(payload!=NULL && displayType!=0)
     {
@@ -1278,7 +1342,6 @@ boolean postSensorData(Data* data[], int dataCount)
       }
     }
 
-    httpClient.end();
     return true;
   }
   else
@@ -1292,22 +1355,11 @@ boolean postSensorData(Data* data[], int dataCount)
     }
       
     serverError = true;
-    Serial.println("Server Error: "+String(httpCode));
-
-    Serial.println("Server Error: "+httpClient.errorToString(httpCode));
+    Serial.println("\nServer Error: "+String(httpCode)+" - "+httpClient.errorToString(httpCode));
     Serial.println(WiFi.status());
 
     httpClient.end();
 
-    postSensorDataRetry++;
-
-    if(postSensorDataRetry>=25)
-    {
-      postSensorDataRetry=0;
-      restart();
-    }
-
-    Serial.println("Retry #"+String(postSensorDataRetry)+", restart at 25");
   }
   return false;
 }

@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v43 - Fixed data transmit issues in configurations with many sensors
     v42 - Fixed low memory issues in configurations with many sensors and a ST7735 Bug
     v41 - Changed IDE, Sensatio, Renamed Display Class to support more types
     v40 - New Display Structure to enable Display Rotation, different Styles etc.
@@ -32,7 +33,7 @@
 VisualisationHelper* vHelper;
 Display* display = NULL;
 
-int currentVersion = 42;
+int currentVersion = 43;
 boolean printMemory = false;
 
 //String board = "Generic";
@@ -54,7 +55,7 @@ boolean printMemory = false;
 extern String name = "Bridge";
 extern String ucType = "ESP8266";
 
-String variant = "SensateV"+String(currentVersion)+board;
+String variant = "SensatioV"+String(currentVersion)+board;
 
 String apiVersion = "v1";
 

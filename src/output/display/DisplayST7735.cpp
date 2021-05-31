@@ -203,10 +203,27 @@ void DisplayST7735::drawString(int16_t x, int16_t y, String text) {
 
 void DisplayST7735::drawDisconnected(bool update) {
 
+  if(!isResetting && displayEnabled)
+  {
+	display->fillRect(144, 112, 16, 16, ST7735_BLACK); // @suppress("Method cannot be resolved")
+
+    display->drawLine(144, 117, 150, 117, ST7735_CYAN);
+    display->drawLine(144, 123, 148, 123, ST7735_CYAN);
+    display->drawLine(148, 127, 151, 113, ST7735_CYAN);
+    display->drawLine(152, 127, 155, 113, ST7735_CYAN);
+
+    display->drawLine(154, 117, 195, 117, ST7735_CYAN);
+    display->drawLine(153, 123, 195, 123, ST7735_CYAN);
+
+    }
 }
 
 void DisplayST7735::drawConnected(bool update) {
 
+  if(!isResetting && displayEnabled)
+  {
+	  display->fillRect(112, 48, 16, 16, ST7735_BLACK);
+  }
 }
 
 int DisplayST7735::getSimultanValueCount() {

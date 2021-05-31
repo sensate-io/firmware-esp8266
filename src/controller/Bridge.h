@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v43 - Fixed data transmit issues in configurations with many sensors
     v42 - Fixed low memory issues in configurations with many sensors and a ST7735 Bug
     v40 - New Display Structure to enable Display Rotation, different Styles etc.
     v36 - Greatly improved reliability of connectivity
@@ -65,6 +66,7 @@ void addSensor(Sensor *);
 void loopSensor(int);
 void loopDisplay(unsigned long);
 boolean postSensorData(Data* data[], int);
+boolean postSensorDataPart(Data* data[], int, int);
 void checkStatus();
 void trySleep(long);
 void storeDisplayAndPowerConfig(boolean);
