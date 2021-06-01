@@ -845,7 +845,7 @@ void configureExpansionPort(int portNumber, JsonObject& portConfig) {
   else if (portConfig["et"] == "DHT11" || portConfig["et"] == "DHT21" || portConfig["et"] == "DHT22")
   {
     uint8_t port = translateGPIOPort(portConfig["ec1"]);
-    if(port<999)
+    if(port<99)
     {
       addSensor(new SensorDHT(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], portConfig["et"], port, refreshInterval, postDataInterval, portConfig["s"]["svt"], calc));
     }
@@ -968,7 +968,7 @@ void configurePort(int portNumber, JsonObject& portConfig) {
   else
   {
     uint8_t intPort = translateGPIOPort(port);
-    if(intPort<999)
+    if(intPort<99)
     {
       Serial.print("Setting up Digital Switch at Port: ");
       Serial.println(port);
@@ -1208,7 +1208,7 @@ uint8_t translateGPIOPort(String gpioPort)
   if(gpioPort=="16")
     return 16;  
   
-  return 999;
+  return 99;
 }
 
 boolean postSensorData(Data* data[], int dataCount)
@@ -1270,9 +1270,6 @@ boolean postSensorData(Data* data[], int dataCount)
 		Serial.print(postSensorDataRetry);
 		Serial.println(", restart at 25");
 	}
-
-	Serial.print(" | HEAP: ");
-	Serial.println(ESP.getFreeHeap());
 
 	return success;
 }

@@ -38,8 +38,8 @@ int currentVersion = 44;
 boolean printMemory = false;
 
 //String board = "Generic";
-////char firmwareType[] = "ESP8266";
-// char firmwareType[] = "ESP8266-1M";
+//char firmwareType[] = "ESP8266";
+//char firmwareType[] = "ESP8266-1M";
 
  String board = "NodeMCU";
  char firmwareType[] = "ESP8266-NodeMCU";
