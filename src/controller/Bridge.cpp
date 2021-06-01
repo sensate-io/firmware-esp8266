@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v44 - More Memory Improvements
     v43 - Fixed data transmit issues in configurations with many sensors
     v42 - Fixed low memory issues in configurations with many sensors and a ST7735 Bug
     v41 - Renamed Display Class to support more types
@@ -85,7 +86,6 @@ bool foundPorts = false;
 
 String urlString;
 String requestDataString;
-String message;
 String payload;
 
 std::unique_ptr<BearSSL::WiFiClientSecure>sslClient(new BearSSL::WiFiClientSecure);
@@ -881,7 +881,8 @@ void configurePort(int portNumber, JsonObject& portConfig) {
   
   String port = portConfig["p"];
   
-  Serial.println("Configure Onboard Port:" + port);
+  Serial.print("Configure Onboard Port:");
+  Serial.println(port);
 
   //portConfig.prettyPrintTo(Serial);
   Serial.println("");
@@ -969,7 +970,8 @@ void configurePort(int portNumber, JsonObject& portConfig) {
     uint8_t intPort = translateGPIOPort(port);
     if(intPort<999)
     {
-      Serial.println("Setting up Digital Switch at Port: " + port);
+      Serial.print("Setting up Digital Switch at Port: ");
+      Serial.println(port);
       addSensor(new SensorDigitalSwitch(portConfig["id"], portConfig["c"], portConfig["sn"], portConfig["n"], intPort, refreshInterval, postDataInterval, calc));
     }
   }
@@ -1063,7 +1065,9 @@ void loopSensor(int currentTimeMs) {
     if(!abortDelay)
     {
       int delayTime=100*retry;  
-      Serial.println("Communication Issues - Retrying in "+String(delayTime)+"ms ");
+      Serial.print("Communication Issues - Retrying in ");
+      Serial.print(delayTime);
+      Serial.println("ms ");
       yield();
       delay(delayTime);
     }
@@ -1106,7 +1110,8 @@ void trySleep(long microseconds)
     {
       loopDisplay(millis());
       doPowerSaving();
-      Serial.println("Going to deep sleep for "+String(microseconds));
+      Serial.print("Going to deep sleep for ");
+	  Serial.println(microseconds);
       ESP.deepSleep(microseconds);
     }
 }
@@ -1115,7 +1120,8 @@ void doPowerSaving() {
 
     if(powerSavePort!=NULL && !powerSavePort.length()>0)
     {
-        Serial.println("Switching Power Save Port: "+powerSavePort);
+        Serial.print("Switching Power Save Port: ");
+        Serial.println(powerSavePort);
 
         int port = translateGPIOPort(powerSavePort);
 
@@ -1134,7 +1140,8 @@ void doPowerSavingInit(boolean doDelay) {
 
   if(powerSavePort!="")
   {
-    Serial.println("Init Power Save Port: "+powerSavePort);
+    Serial.print("Init Power Save Port: ");
+    Serial.println(powerSavePort);
 
     int port = translateGPIOPort(powerSavePort);
 
@@ -1145,7 +1152,8 @@ void doPowerSavingInit(boolean doDelay) {
     }
     else
     {
-      Serial.println("No valid Power Save Port defined: "+powerSavePort);
+      Serial.print("No valid Power Save Port defined: ");
+	  Serial.println(powerSavePort);
     }
   }
   else
@@ -1258,8 +1266,13 @@ boolean postSensorData(Data* data[], int dataCount)
 		  restart();
 		}
 
-		Serial.println("Retry #"+String(postSensorDataRetry)+", restart at 25");
+		Serial.print("Retry #");
+		Serial.print(postSensorDataRetry);
+		Serial.println(", restart at 25");
 	}
+
+	Serial.print(" | HEAP: ");
+	Serial.println(ESP.getFreeHeap());
 
 	return success;
 }
@@ -1271,13 +1284,21 @@ boolean postSensorDataPart(Data* data[], int startIndex, int endIndex)
 
   for (int i = startIndex; i <= endIndex; i++)
   {
-    if (i == startIndex)
-      requestDataString = data[i]->getRequestString();
-    else
-      requestDataString = requestDataString + "," + data[i]->getRequestString();
+    if (i > startIndex)
+    {
+    	requestDataString += ",";
+    }
+    requestDataString += data[i]->getRequestString();
   }
 
-  urlString = bridgeURL + "/" + apiVersion + "/data/" + getUUID() + "/" + requestDataString;
+  urlString = "";
+  urlString += bridgeURL;
+  urlString += "/";
+  urlString += apiVersion ;
+  urlString += "/data/";
+  urlString += getUUID();
+  urlString += "/";
+  urlString += requestDataString;
 
   httpClient.begin(*sslClient, urlString);
 
@@ -1353,7 +1374,12 @@ boolean postSensorDataPart(Data* data[], int startIndex, int endIndex)
     }
       
     serverError = true;
-    Serial.println("\nServer Error: "+String(httpCode)+" - "+httpClient.errorToString(httpCode));
+
+    Serial.print("\nServer Error: ");
+    Serial.print(httpCode);
+    Serial.print(" - ");
+    Serial.print(httpClient.errorToString(httpCode));
+	Serial.print(" - WIFI: ");
     Serial.println(WiFi.status());
 
     httpClient.end();

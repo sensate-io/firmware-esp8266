@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v44 - More Memory Improvements
     v43 - Fixed data transmit issues in configurations with many sensors
     v42 - Fixed low memory issues in configurations with many sensors and a ST7735 Bug
     v41 - Changed IDE, Sensatio, Renamed Display Class to support more types
@@ -33,11 +34,11 @@
 VisualisationHelper* vHelper;
 Display* display = NULL;
 
-int currentVersion = 43;
+int currentVersion = 44;
 boolean printMemory = false;
 
 //String board = "Generic";
-//char firmwareType[] = "ESP8266";
+////char firmwareType[] = "ESP8266";
 // char firmwareType[] = "ESP8266-1M";
 
  String board = "NodeMCU";
@@ -84,18 +85,26 @@ extern uint8_t i2cSDAPort;
 extern uint8_t i2cSCLPort;
 extern MQTT* mqtt;
 
+extern String urlString;
+extern String requestDataString;
+extern String payload;
+
 #define tickerInterval 250
 #define delayInterval 10000
 
 
 void setup()
 {
-	Serial.begin(9600);
+  Serial.begin(9600);
   Serial.println("---------------------------");
   Serial.println(variant);
   Serial.println("---------------------------");
   Serial.println("Startup: ");
   Serial.println(getUUID()); // @suppress("Invalid arguments")
+
+  urlString.reserve(300);
+  requestDataString.reserve(200);
+  payload.reserve(1000);
 
   restoreBridgeConfig();
 
