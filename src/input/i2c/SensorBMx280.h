@@ -11,6 +11,8 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v45 - Fixed Pressure Measurement for BME280 Sensors
+    v33 - Changes for Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
 */

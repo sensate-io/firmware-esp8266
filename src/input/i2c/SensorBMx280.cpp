@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v45 - Fixed Pressure Measurement for BME280 Sensors
     v33 - Changes for Digital Sensor Switch Support
     v32 - Added MQTT Support!
     v29 - First Public Release
@@ -98,13 +99,13 @@ Data* SensorBMx280::read(bool shouldPostData)
     }
     else if(_calculation->getValueType()=="pressure")
     {    
-       float pressure = bme->pres() / 100.0F;
+       float pressure = bme->pres(BME280::PresUnit_hPa);
        shouldPostData = smartSensorCheck(pressure, _smartValueThreshold, shouldPostData);
        return _calculation->calculate(this, pressure, shouldPostData);  
     }
     else if(_calculation->getValueType()=="altitude")
     {     
-        float pressure = bme->pres() / 100.0F;
+        float pressure = bme->pres(BME280::PresUnit_hPa);
         shouldPostData = smartSensorCheck(pressure, _smartValueThreshold, shouldPostData);
         return _calculation->calculate(this, pressure, shouldPostData);
     }

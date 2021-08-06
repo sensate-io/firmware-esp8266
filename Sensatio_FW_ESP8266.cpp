@@ -11,6 +11,7 @@
     SOURCE: https://github.com/sensate-io/firmware-esp8266.git
 
     @section  HISTORY
+    v45 - Fixed Pressure Measurement for BME280 Sensors
     v44 - More Memory Improvements
     v43 - Fixed data transmit issues in configurations with many sensors
     v42 - Fixed low memory issues in configurations with many sensors and a ST7735 Bug
@@ -34,7 +35,7 @@
 VisualisationHelper* vHelper;
 Display* display = NULL;
 
-int currentVersion = 44;
+int currentVersion = 45;
 boolean printMemory = false;
 
 //String board = "Generic";
